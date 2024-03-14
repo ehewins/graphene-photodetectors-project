@@ -10,3 +10,6 @@ The measurement data in this folder was recorded on the 2nd of February 2024. Th
 `OFET1-Isd-Vsd-Vg1.dat` and `OFET1-Isd-Vsd-Vg5.dat` are further measurements of the same OFET, this time with the gate voltage held constant and the source-drain voltage varied. The four columns are the source-drain voltage, source-drain current, gate voltage, and gate current.
 
 `OFET2-Isd-Vg-Vsd1.dat`, `OFET2-Isd-Vsd-Vg1.dat` and `OFET2-Isd-Vsd-Vg5.dat` contain the same types of measurement data as their equivalently named OFET1 files, but correspond to a second OFET device. We stopped taking measurements early, because we realised this device was broken.
+
+The Python file `graphing.py` produces plots of the recorded data. No further data processing is carried out.
+
