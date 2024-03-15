@@ -14,3 +14,5 @@ The files `OFET3F-Isd-Vg-Dark.dat` and `OFET3F-Isd-Vsd-Dark.dat` are measurement
 The files `OFET3F-Isd-Vg-Light.dat` and `OFET3F-Isd-Vsd-Light.dat` are measurements taken after the perovskites were deposited onto the OFET, while the device was illuminated by 405 nm light (laser power: 4.5 mW). They contain the same types of measurement as the two equivalently named files described above.
 
 The file `OFET3F-TimeExperiment-Vg=0,Vsd=5V.dat` contains time-series measurements of the source-drain current while we repeatedly uncovered and covered the window of the cryostat, exposing the device to the laser light described above. The columns are the datapoint number, the source-drain current, the gate voltage, the gate current, and the time in seconds.
+
+The file `data-processing.py` graphs the data in the files above, as well as performing linear fitting to specific regions of data. It calculates the resistance, field effect mobility, carrier concentration, and photocurrent of the perovskites.
