@@ -8,11 +8,11 @@ def linear_fit(x, m, c):
 
 
 def on_exp(t, a, tau):
-    return a * (np.exp(- t / tau) - 1)
+    return a * (1 - np.exp(- t / tau))
 
 
 def off_exp(t, a, tau):
-    return a * (1 - np.exp(- t / tau))
+    return a * (np.exp(- t / tau) - 1)
 
 
 """
@@ -197,7 +197,7 @@ for i in range(len(region_indices)-1):
         fit_func = off_exp
         times_array, time_errs_array = off_times, off_time_errs
     (I_jump, response_t), cv = curve_fit(fit_func, region_time, region_Isd)
-    photocurrents.append(abs(I_jump))
+    photocurrents.append(I_jump)
     photocurrent_errs.append(np.sqrt(cv[0, 0]))
     times_array.append(response_t)
     time_errs_array.append(np.sqrt(cv[1, 1]))
