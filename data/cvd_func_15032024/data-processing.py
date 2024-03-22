@@ -215,8 +215,9 @@ print(f"The average 'on' response time is {np.mean(on_times):e} ± {np.std(on_ti
 print(f"The average 'off' response time is {np.mean(off_times):e} ± {np.std(off_times):e} seconds.")
 
 # CVD2 calculations
-device2_I_values = np.array([4.120, 4.160, 4.066, 4.026, 4.064, 4.102, 4.032, 3.985, 4.011, 4.054, 3.992, 3.948, 3.972, 4.013, 3.972, 3.932])*1e-6
-I_err = 1e-9
+device2_I_values = np.array([4.120, 4.160, 4.066, 4.026, 4.064, 4.102, 4.032,
+                             3.985, 4.011, 4.054, 3.992, 3.948, 3.972, 4.013,
+                             3.972, 3.932])*1e-6
 magnitude_I_jumps2 = np.abs(device2_I_values[1::2] - device2_I_values[0::2])
 device2_photocurrent = np.mean(magnitude_I_jumps2)
 device2_photocurrent_err = np.std(magnitude_I_jumps2)
