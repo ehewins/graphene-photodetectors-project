@@ -1,0 +1,16 @@
+# More CVD Graphene FET Measurements, Post-functionalisation
+
+The measurement data in this folder was recorded on the 19th of March 2024.
+It was observed that the Dirac voltage of Device 1 had changed since the last set of measurements, so several of the files in this folder are dedicated to recording other changes in the two devices' properties.
+The dependence of the source-drain current on both the source drain voltage and the gate voltage is measured (dark/light), for higher maximum gate voltages than previous measurements. These reveal the location of the Dirac point / Dirac voltage. Also measured is photocurrent at the previous source-drain voltage of 10 mV, as well as the higher value of 50 mV. At V_{sd} = 50 mV, additional measurements were taken with various filters placed between the laser and the cryostat window. These measurements allow the photoresponsivity to be measured as a function of power incident on the device.
+The results were collected at room temperature and a pressure of 3x10^{-6} mbar. The GFETs have a Si/SiO2 substrate, with an oxide layer thickness of 90 nm. All current measurements are in units of Amperes, and all voltage measurements in Volts.
+
+# About the Files
+
+`CVD1F-Isd-Vsd-Dark.dat`, `CVD1F-Isd-Vsd-Light.dat`, `CVD2F-Isd-Vsd-Dark.dat`, and `CVD2F-Isd-Vsd-Light.dat` contain another round of measurements of the source-drain current (second column) as a function of source-drain voltage (first column), with zero gate voltage. Again, CVD1F / CVD2F refers to Device 1 or 2, and the Dark / Light part of the filename indicates whether the laser was shone onto the device during the measurements.
+
+`CVD1F-Isd-Vg-Dark.dat`, `CVD1F-Isd-Vg-Light.dat`, `CVD2F-Isd-Vg-Dark.dat`, and `CVD2F-Isd-Vg-Light.dat` contain, primarily, measurements of the source-drain current as a function of gate voltage, with a constant source-drain voltage of 10 mV. The first column gives the gate voltage, the second the gate current, the third the source-drain voltage, and the fourth the source-drain current. There are also similarly named files with additional suffixes before the `.dat` extension. A number followed by `max` indicates the maximum gate voltage - these are the measurements we took while searching for the Dirac point. Some files also have an additional `-2` at the end. These are the final measurements taken to establish the final state of the devices after the day's measurements.
+
+`CVD1F-time-10mV.dat` and `CVD2F-time-10mV.dat` are repeats of the previous time-series measurements of the source-drain current (while covering and uncovering the window). The columns are the datapoint number, the time in seconds, the source-drain voltage and the source-drain current. 10 mV refers to the source-drain voltage. `CVD1F-time-50mV.dat` and `CVD2F-time-50mV.dat` are similar, except for a source-drain voltage of 50 mV instead of 10. Files with the suffix `-OD1`/`2`/`3` before the `.dat` extension indicate the optical density of the filter used for that set of measurements.
+
+`data-processing.py` graphs the data in the files above, as well as automatically determining the Dirac voltages, comparing previous and current values of source-drain resistance. In addition, the photocurrent is determined, and the photoresponsivity as a function of power.
