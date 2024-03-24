@@ -103,7 +103,6 @@ rel_dc1 = errs1[1] / c1
 rel_dm2 = errs2[0] / m2
 rel_dc2 = errs2[1] / c2
 
-# THESE ARE WRONG -> CHANGE
 L = 50e-6  # channel length (m)
 dL = 1e-6  # uncertainty in channel length (m)
 rel_dL = dL / L
