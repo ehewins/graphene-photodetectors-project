@@ -66,7 +66,6 @@ file_table = (
 
 fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(14, 6))
-fig3, ax5 = plt.subplots()
 for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_table):
     print()
     Vg, Isd = np.loadtxt(data[0], delimiter='\t', usecols=(0, 3), unpack=True)
@@ -82,7 +81,7 @@ for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_tab
     print(f"Dirac point for {data[0][:4]} in {data[1].lower()} at {V_dirac:.2f} V")
     Rsd = Vsd / Isd  # Device is square, so resistance = resistivity
     R_ax.plot(Vg, Rsd, label=data[1])
-    I_ax.plot(Vg, Isd, label=data[1])
+    I_ax.plot(Vg, Isd, label=data[1], linewidth=2)
 
     # MOBILITY CALCULATIONS:
     # Obtain the two volgate values at which resistivity is closest to its FWHM
@@ -110,23 +109,29 @@ for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_tab
         c = b - m * a
         boundary_V = min(Vg) if m < 0 else max(Vg)
         I_ax.plot([boundary_V, -c/m], [m*boundary_V+c, 0],
-                  linestyle='dotted', color='black')
+                  linestyle='dotted', color='black', linewidth=1.2)
         # Calculate mobility and print result
         mu = d / (epsilon_0 * epsilon_r * Vsd) * abs(m)
         print(f"{mu:e} cm^2 V^-1 s^-1,", end=' ')
     print()
-    # Mobility from maximum gradient of Isd(Vg) curve:
-    ax5.plot(Vg, np.abs(noisy_gradient), color='black', linestyle='dotted')
-    ax5.plot(Vg, np.abs(gradient), label=data[0][:4]+" "+data[1])
+    # Mobility from maximum gradient of Isd(Vg) curve (local to V_dirac):
     # find the two turning points of the gradient either side of V_dirac
     gradient2 = np.gradient(np.abs(gradient), Vg)
     # the +/-0.5 below is for insurance.
     linear_index_1 = np.nonzero((Vg < V_dirac-0.5) & (gradient2 > 0))[0][-1]
     linear_index_2 = np.nonzero((Vg > V_dirac+0.5) & (gradient2 < 0))[0][0]
-    ax5.plot([Vg[linear_index_1]], [np.abs(gradient)[linear_index_1]], 'ko')
-    ax5.plot([Vg[linear_index_2]], [np.abs(gradient)[linear_index_2]], 'ko')
-ax5.set_title("Gradient of current versus gate voltage")
-ax5.legend()
+    print("The maxiumum gradient implies mobility:", end=' ')
+    for i in (linear_index_1, linear_index_2):
+        # Plot extrapolations to Isd = 0
+        m, a, b = gradient[i], Vg[i], Isd[i]
+        c = b - m * a
+        boundary_V = min(Vg) if m < 0 else max(Vg)
+        I_ax.plot([boundary_V, -c/m], [m*boundary_V+c, 0],
+                  linestyle='dotted', color='blue', linewidth=1.2)
+        # Calculate mobility and print result
+        mu = d / (epsilon_0 * epsilon_r * Vsd) * abs(m)
+        print(f"{mu:e} cm^2 V^-1 s^-1,", end=' ')
+    print()
 for ax in (ax1, ax2, ax3, ax4):
     ax.set_xlabel("Gate voltage, $V_g$ (V)")
     ax.legend()
