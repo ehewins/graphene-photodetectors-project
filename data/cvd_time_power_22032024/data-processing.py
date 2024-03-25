@@ -1,5 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.signal import convolve
+
+
+def top_hat(width):
+    return np.ones(width) / width
 
 
 """
@@ -42,8 +47,8 @@ terminology there).
 """
 Objective 2:
 Determine the Dirac voltage for this set of measurements, as well as the FWHM
-and hence the three point mobility. Compare to the mobility found from the
-gradient of the linear region.
+and hence the three point mobility. Compare to the mobility found using the
+gradient of various parts of the curve.
 """
 
 Vsd = 10e-3  # 10 mV source-drain voltage
@@ -59,10 +64,11 @@ file_table = (
     ("CVD2F-Isd-Vg-Light-final.dat", "Light conditions", 4),
 )
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-ax1.set_title("Device 1 - Functionalised with Quantum Dots")
-ax2.set_title("Device 2 - Functionalised with Perovskites")
-for ax, data in zip((ax1, ax1, ax2, ax2), file_table):
+fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(14, 6))
+fig3, ax5 = plt.subplots()
+for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_table):
+    print()
     Vg, Isd = np.loadtxt(data[0], delimiter='\t', usecols=(0, 3), unpack=True)
     npass = data[2]
     points_per_pass = len(Vg)//npass
@@ -75,19 +81,95 @@ for ax, data in zip((ax1, ax1, ax2, ax2), file_table):
     V_dirac = Vg[np.argmin(Isd)]
     print(f"Dirac point for {data[0][:4]} in {data[1].lower()} at {V_dirac:.2f} V")
     Rsd = Vsd / Isd  # Device is square, so resistance = resistivity
-    ax.plot(Vg, Rsd, label=data[1])
+    R_ax.plot(Vg, Rsd, label=data[1])
+    I_ax.plot(Vg, Isd, label=data[1])
+
+    # MOBILITY CALCULATIONS:
     # Obtain the two volgate values at which resistivity is closest to its FWHM
-    FWHM_voltages = Vg[np.sort(np.argsort(np.abs(Rsd - max(Rsd)/2))[:2])]
-    if FWHM_voltages[1] - FWHM_voltages[0] < 1:  # i.e. only one side visible
+    FWHM_indices = np.sort(np.argsort(np.abs(Rsd - max(Rsd)/2))[:2])
+    FWHM_voltages = Vg[FWHM_indices]
+    if FWHM_voltages[1] - FWHM_voltages[0] < 0.5:  # i.e. only one side visible
         print("Assuming equal electron and hole mobilities,", end=' ')
+        FWHM_indices[1] = FWHM_indices[0]
         FWHM_voltages[1] = V_dirac + (V_dirac - FWHM_voltages[0])
+    I_ax.plot(FWHM_voltages, Isd[FWHM_indices], 'kx')
     V_FWHM = FWHM_voltages[1] - FWHM_voltages[0]
     print(f"FWHM for {data[0][:4]} in {data[1].lower()} is {V_FWHM:.2f} V")
+    # Use the FWHM to calculate the three-point mobility
     mu_3p = 4 * d / (epsilon_0 * epsilon_r * V_FWHM * max(Rsd))
-    print(f"implying a 3-point mobility of {mu_3p*1e4:e} cm^2 V^-1 s^-1")
+    print(f"-> implying a 3-point mobility of {mu_3p*1e4:e} cm^2 V^-1 s^-1")
+    # Calculate the gradient, for alternative mobility calculations
+    noisy_gradient = np.gradient(Isd, Vg)
+    # Smooth out the noise in this gradient
+    gradient = np.convolve(noisy_gradient, top_hat(20), mode='same')
+    # Mobility from gradient at FWHM voltages:
+    print("The gradient at FWHM voltages implies mobility:", end=' ')
+    for i in np.unique(FWHM_indices):
+        # Plot extrapolations to Isd = 0
+        m, a, b = gradient[i], Vg[i], Isd[i]
+        c = b - m * a
+        boundary_V = min(Vg) if m < 0 else max(Vg)
+        I_ax.plot([boundary_V, -c/m], [m*boundary_V+c, 0],
+                  linestyle='dotted', color='black')
+        # Calculate mobility and print result
+        mu = d / (epsilon_0 * epsilon_r * Vsd) * abs(m)
+        print(f"{mu:e} cm^2 V^-1 s^-1,", end=' ')
+    print()
+    # Mobility from maximum gradient of Isd(Vg) curve:
+    ax5.plot(Vg, np.abs(noisy_gradient), color='black', linestyle='dotted')
+    ax5.plot(Vg, np.abs(gradient), label=data[0][:4]+" "+data[1])
+    # find the two turning points of the gradient either side of V_dirac
+    gradient2 = np.gradient(np.abs(gradient), Vg)
+    # the +/-0.5 below is for insurance.
+    linear_index_1 = np.nonzero((Vg < V_dirac-0.5) & (gradient2 > 0))[0][-1]
+    linear_index_2 = np.nonzero((Vg > V_dirac+0.5) & (gradient2 < 0))[0][0]
+    ax5.plot([Vg[linear_index_1]], [np.abs(gradient)[linear_index_1]], 'ko')
+    ax5.plot([Vg[linear_index_2]], [np.abs(gradient)[linear_index_2]], 'ko')
+ax5.set_title("Gradient of current versus gate voltage")
+ax5.legend()
+for ax in (ax1, ax2, ax3, ax4):
+    ax.set_xlabel("Gate voltage, $V_g$ (V)")
+    ax.legend()
+for ax in (ax1, ax2):
+    ax.set_ylabel("Resistivity, $\\rho$ ($\\Omega$/sq)")
+for ax in (ax3, ax4):
+    ax.set_ylabel("Source-drain current, $I_{sd}$ (A)")
+for ax in (ax1, ax3):
+    ax.set_title("Device 1 - Functionalised with Quantum Dots")
+for ax in (ax2, ax4):
+    ax.set_title("Device 2 - Functionalised with Perovskites")
+
+"""
+Obtains plots of the assumed photocurrent as a function of gate voltage
+"""
+
+CVD1_Vg, CVD1_Isd_dark = np.loadtxt(file_table[0][0], delimiter='\t',
+                                    usecols=(0, 3), unpack=True)
+npass = file_table[0][2]
+start, end = np.array([npass-2, npass-1]) * len(CVD1_Isd_dark) // npass
+CVD1_Vg, CVD1_Isd_dark = CVD1_Vg[start:end], CVD1_Isd_dark[start:end]
+CVD1_Isd_light = np.loadtxt(file_table[1][0], delimiter='\t', usecols=(3))
+npass = file_table[1][2]
+start, end = np.array([npass-2, npass-1]) * len(CVD1_Isd_light) // npass
+CVD1_Isd_light = CVD1_Isd_light[start:end]
+
+CVD2_Vg, CVD2_Isd_dark = np.loadtxt(file_table[2][0], delimiter='\t',
+                                    usecols=(0, 3), unpack=True)
+npass = file_table[2][2]
+start, end = np.array([npass-2, npass-1]) * len(CVD2_Isd_dark) // npass
+CVD2_Vg, CVD2_Isd_dark = CVD2_Vg[start:end], CVD2_Isd_dark[start:end]
+CVD2_Isd_light = np.loadtxt(file_table[3][0], delimiter='\t', usecols=(3))
+npass = file_table[3][2]
+start, end = np.array([npass-2, npass-1]) * len(CVD2_Isd_light) // npass
+CVD2_Isd_light = CVD2_Isd_light[start:end]
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+ax1.plot(CVD1_Vg, np.abs(CVD1_Isd_dark - CVD1_Isd_light))
+ax2.plot(CVD2_Vg, np.abs(CVD2_Isd_dark - CVD2_Isd_light))
 for ax in (ax1, ax2):
     ax.set_xlabel("Gate voltage, $V_g$ (V)")
-    ax.set_ylabel("Resistivity, $\\rho$ ($\\Omega$/sq)")
-    ax.legend()
+    ax.set_ylabel("Theorised photocurrent, $I_{ph}$ (A)")
+ax1.set_title("Device 1 - Functionalised with Quantum Dots")
+ax2.set_title("Device 2 - Functionalised with Perovskites")
 
 plt.show()
