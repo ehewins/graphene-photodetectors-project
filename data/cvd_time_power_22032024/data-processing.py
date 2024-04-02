@@ -143,6 +143,7 @@ for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_tab
     I_ax.plot(FWHM_voltages, Isd[FWHM_indices], 'rx')
     V_FWHM = FWHM_voltages[1] - FWHM_voltages[0]
     print(f"FWHM for {data[0][:4]} in {data[1].lower()} is {V_FWHM:.2f} V")
+    print(f"(the maximum resistivity: {max(Rsd):e} Ω/sq)")
     # Use the FWHM to calculate the three-point mobility
     mu_3p = 4 * d / (epsilon_0 * epsilon_r * V_FWHM * max(Rsd))
     print(f"-> implying a 3-point mobility of {mu_3p*1e4:e} cm^2 V^-1 s^-1")
@@ -242,12 +243,12 @@ Use these to determine the relationship between power and photoresponsivity.
 
 fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(14, 6))
-fig1.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
-fig2.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
+fig1.suptitle("With constant $V_{sd} = 50$ mV")
+fig2.suptitle("With constant $V_{sd} = 50$ mV")
 for ax in (ax1, ax3):
-    ax.set_title("Device 1 - Quantum Dots")
+    ax.set_title("Device 1 (Quantum Dots) at $V_g = -11.5$ V:")
 for ax in (ax2, ax4):
-    ax.set_title("Device 2 - Perovskites")
+    ax.set_title("Device 2 (Perovskites) at $V_g = -1.3$ V:")
 for ax in (ax1, ax2):
     ax.set_xlabel("Time, $t$, (s)")
     ax.set_ylabel("Source-drain current, $I_{sd}$, (A)")
