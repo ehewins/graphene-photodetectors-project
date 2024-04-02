@@ -36,6 +36,8 @@ fit_region_names = ("Initial dark period", "Illuminated period",
 current *= 1e6  # convert to microamps for plotting
 time /= 3600  # convert to hours for plotting
 fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+ax.plot([time[0], time[-1]], [current[0], current[0]], 'k--')
+ax.annotate("Initial current", (time[-1]*0.75, current[0]+0.015))
 ax.plot(time, current)
 ax.set_xlabel("Time, $t$ (hours)")
 ax.set_ylabel("Source-drain current, $I_{sd}$, ($\\mu$A)")
