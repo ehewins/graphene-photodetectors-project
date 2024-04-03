@@ -152,7 +152,7 @@ for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_tab
     # Smooth out the noise in this gradient
     gradient = np.convolve(noisy_gradient, top_hat(20), mode='same')
     # Mobility from gradient at FWHM voltages:
-    print("The gradient at FWHM voltages implies mobility:", end=' ')
+    print("The gradient at FWHM voltages implies:", end=' ')
     for i in np.unique(FWHM_indices):
         # Plot extrapolations to Isd = 0
         m, a, b = gradient[i], Vg[i], Isd[i]
@@ -162,7 +162,8 @@ for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_tab
                   linestyle='dotted', color='red')
         # Calculate mobility and print result
         mu = d / (epsilon_0 * epsilon_r * Vsd) * abs(m)
-        print(f"{mu:e} cm^2 V^-1 s^-1,", end=' ')
+        print(f"mobility {mu*1e4:e} cm^2 V^-1 s^-1", end=' ')
+        print(f"(with x-axis intercept at {-c/m:.2f} V),", end=' ')
     print()
     # Mobility from maximum gradient of Isd(Vg) curve (local to V_dirac):
     # find the two turning points of the gradient either side of V_dirac
@@ -170,7 +171,7 @@ for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_tab
     # the +/-0.5 below is for insurance.
     linear_index_1 = np.nonzero((Vg < V_dirac-0.5) & (gradient2 > 0))[0][-1]
     linear_index_2 = np.nonzero((Vg > V_dirac+0.5) & (gradient2 < 0))[0][0]
-    print("The maximum gradient implies mobility:", end=' ')
+    print("The maximum gradient implies:", end=' ')
     for i in (linear_index_1, linear_index_2):
         # Plot extrapolations to Isd = 0
         m, a, b = gradient[i], Vg[i], Isd[i]
@@ -181,7 +182,8 @@ for R_ax, I_ax, data in zip((ax1, ax1, ax2, ax2), (ax3, ax3, ax4, ax4), file_tab
                   linestyle='dotted', color='blue')
         # Calculate mobility and print result
         mu = d / (epsilon_0 * epsilon_r * Vsd) * abs(m)
-        print(f"{mu:e} cm^2 V^-1 s^-1,", end=' ')
+        print(f"mobility {mu*1e4:e} cm^2 V^-1 s^-1", end=' ')
+        print(f"(with x-axis intercept at {-c/m:.2f} V),", end=' ')
     print()
 for ax in (ax1, ax2, ax3, ax4):
     ax.set_xlabel("Gate voltage, $V_g$ (V)")
@@ -243,12 +245,12 @@ Use these to determine the relationship between power and photoresponsivity.
 
 fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(14, 6))
-fig1.suptitle("With constant $V_{sd} = 50$ mV")
-fig2.suptitle("With constant $V_{sd} = 50$ mV")
+fig1.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
+fig2.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
 for ax in (ax1, ax3):
-    ax.set_title("Device 1 (Quantum Dots) at $V_g = -11.5$ V:")
+    ax.set_title("Device 1 - Quantum Dots")
 for ax in (ax2, ax4):
-    ax.set_title("Device 2 (Perovskites) at $V_g = -1.3$ V:")
+    ax.set_title("Device 2 - Perovskites")
 for ax in (ax1, ax2):
     ax.set_xlabel("Time, $t$, (s)")
     ax.set_ylabel("Source-drain current, $I_{sd}$, (A)")
