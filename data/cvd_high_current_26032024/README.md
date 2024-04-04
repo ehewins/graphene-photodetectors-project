@@ -1,4 +1,4 @@
-# CVD Graphene FET Measurements
+# CVD Graphene FET Measurements, with High Source-Drain Voltages
 
 The measurement data in this folder was recorded on the 26th of March 2024.
 The purpose of these measurements was to test the boundaries of how high a source-drain current can be passed through the graphene channel, and to observe the effect higher current has on the photoresponsivity of the device. We also sought to maximise the measured photocurrent by optimising the gate voltage across the device based on previous measurements. Device 1 (CVD1) had gate voltage of -11.5 V across it, and Device 2 (CVD2) a voltage of -1.3 V.
