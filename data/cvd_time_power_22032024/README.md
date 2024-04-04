@@ -1,4 +1,4 @@
-# CVD Graphene FET Measurements
+# CVD GFET Long-time and Laser Power Related Measurements
 
 The measurement data in this folder was (mostly) recorded on the 22nd of March 2024. The long-time experiments ran over from previous days.
 The results were collected at room temperature and a pressure of 3x10^{-6} mbar. The GFETs have a Si/SiO2 substrate, with an oxide layer thickness of 90 nm. All current measurements are in units of Amperes, and all voltage measurements in Volts.
@@ -9,7 +9,7 @@ The results were collected at room temperature and a pressure of 3x10^{-6} mbar.
 
 `CVD1F-Isd-Vg-Dark-post-long.dat` and `CVD2F-Isd-Vg-Dark-post-long.dat` are more sets of source-drain current versus gate voltage measurements. These were taken to establish the Dirac voltage following the long experiments above, during which the Dirac point could have shifted considerably. The first column gives the gate voltage, the second the gate current, the third the source-drain voltage, and the fourth the source-drain current.
 
-`CVD1F-time-power.dat` and `CVD2F-time-power.dat` are measurements of the source-drain current versus time, where a series of filters are used to gradually increase the power for a series of periods of light exposure. The first three 'on' periods correspond an OD3 filter, the next two an OD2 filter, the next one and OD1 filter, and the final one no filter (OD0). The columns are the datapoint number, the time in seconds, the source-drain voltage and the source-drain current.
+`CVD1F-time-power.dat` and `CVD2F-time-power.dat` are measurements of the source-drain current versus time, where a series of filters are used to gradually increase the power for a series of periods of light exposure. The first three illuminated periods correspond an OD3 filter, the next two an OD2 filter, the next one an OD1 filter, and the final one no filter (OD0). The columns are the datapoint number, the time in seconds, the source-drain voltage and the source-drain current.
 
 `CVD1F-Isd-Vg-Dark-final.dat`, `CVD1F-Isd-Vg-Light-final.dat`, `CVD2F-Isd-Vg-Dark-final.dat`, and `CVD2F-Isd-Vg-Light-final.dat` are a final set of source-drain current versus gate voltage measurements. These were taken to confirm the final state of the devices after the day's measurements, and to inform choices made about the next day's measurements. The first column gives the gate voltage, the second the gate current, the third the source-drain voltage, and the fourth the source-drain current.
 
