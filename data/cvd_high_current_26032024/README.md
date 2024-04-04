@@ -13,5 +13,4 @@ The results were collected at room temperature and a pressure of 3x10^{-6} mbar.
 
 `CVD1F-Isd-Vg-Dark-final.dat`, `CVD1F-Isd-Vg-Light-final.dat`, `CVD2F-Isd-Vg-Dark-final.dat`, and `CVD2F-Isd-Vg-Light-final.dat` are a final set of source-drain current versus gate voltage measurements. These were taken to confirm the final state of the devices after the day's measurements. The first column gives the gate voltage, the second the gate current, the third the source-drain voltage, and the fourth the source-drain current.
 
-`data-processing.py` graphs the data in the files above, and also determines the parameters of interest from each file.
-NOTE: Add more detail here at some point.
+`data-processing.py` graphs the data in the files above, and also determines the parameters of interest from each file - these being the photocurrent for the time related measurements, and the Dirac voltage (hence carrier concentration) + various calculations of the mobility for the gate voltage measurements.
