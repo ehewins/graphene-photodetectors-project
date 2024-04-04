@@ -7,6 +7,10 @@ def linear_fit(x, m, c):
     return m * x + c
 
 
+def top_hat(width):
+    return np.ones(width) / width
+
+
 def find_jump_indices(array):
     """
     Find the indices corresponding to the start and end of a jump in the data.
@@ -69,6 +73,98 @@ for ax in axes[0]:
 for ax in axes[1]:
     ax.set_xlabel("Source-drain voltage, $V_{sd}$ (mV)")
     ax.set_ylabel("Photocurrent, $I_{ph}$ (A)")
+    ax.legend()
+
+"""
+Objective 2: Graph the final Isd(Vg) measurements, identifying the Dirac
+voltage and mobility as we've done before.
+"""
+
+Vsd = 10e-3  # 10 mV source-drain voltage
+d = 90e-9  # dielectric thickness (m)
+epsilon_r = 3.9  # relative permittivity of dielectric
+epsilon_0 = 8.85e-12  # permittivity of free space (F/m)
+e = 1.6e-19  # charge magnitude of a single carrier (C)
+
+# Table recording file names, the label for the graph, and number of passes
+file_table = (
+    ("CVD1F-Isd-Vg-Dark-final.dat", "Dark conditions", 6),
+    ("CVD1F-Isd-Vg-Light-final.dat", "Light conditions", 6),
+    ("CVD2F-Isd-Vg-Dark-final.dat", "Dark conditions", 4),
+    ("CVD2F-Isd-Vg-Light-final.dat", "Light conditions", 4),
+)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+for ax, file_info in zip((ax1, ax1, ax2, ax2), file_table):
+    print()
+    Vg, Isd = np.loadtxt(file_info[0], delimiter='\t', usecols=(0, 3), unpack=True)
+    npass = file_info[2]
+    points_per_pass = len(Vg)//npass
+    # Only use the final forward pass.
+    Vg = Vg[(npass-2)*points_per_pass:(npass-1)*points_per_pass]
+    Isd = Isd[(npass-2)*points_per_pass:(npass-1)*points_per_pass]
+    V_dirac = Vg[np.argmin(Isd)]
+    print(f"Dirac point for {file_info[0][:4]} in {file_info[1].lower()} at {V_dirac:.2f} V")
+    p0 = V_dirac * (epsilon_0 * epsilon_r) / (e * d)
+    print(f"-> implying an initial carrier concentration of {p0*1e-4:e} cm^-2")
+    Rsd = Vsd / Isd  # Device is square, so resistance = resistivity
+    ax.plot(Vg, Isd, label=file_info[1], linewidth=2)
+    # MOBILITY CALCULATIONS:
+    # Obtain the two volgate values at which resistivity is closest to its FWHM
+    FWHM_indices = np.sort(np.argsort(np.abs(Rsd - max(Rsd)/2))[:2])
+    FWHM_voltages = Vg[FWHM_indices]
+    if FWHM_voltages[1] - FWHM_voltages[0] < 0.5:  # i.e. only one side visible
+        print("Assuming equal electron and hole mobilities,", end=' ')
+        FWHM_indices[1] = FWHM_indices[0]
+        FWHM_voltages[1] = V_dirac + (V_dirac - FWHM_voltages[0])
+    ax.plot(FWHM_voltages, Isd[FWHM_indices], 'rx')
+    V_FWHM = FWHM_voltages[1] - FWHM_voltages[0]
+    print(f"FWHM for {file_info[0][:4]} in {file_info[1].lower()} is {V_FWHM:.2f} V")
+    print(f"(the maximum resistivity: {max(Rsd):e} Ω/sq)")
+    # Use the FWHM to calculate the three-point mobility
+    mu_3p = 4 * d / (epsilon_0 * epsilon_r * V_FWHM * max(Rsd))
+    print(f"-> implying a 3-point mobility of {mu_3p*1e4:e} cm^2 V^-1 s^-1")
+    # Calculate the gradient, for alternative mobility calculations
+    noisy_gradient = np.gradient(Isd, Vg)
+    # Smooth out the noise in this gradient
+    gradient = np.convolve(noisy_gradient, top_hat(20), mode='same')
+    # Mobility from gradient at FWHM voltages:
+    print("The gradient at FWHM voltages implies:", end=' ')
+    for i in np.unique(FWHM_indices):
+        # Plot extrapolations to Isd = 0
+        m, a, b = gradient[i], Vg[i], Isd[i]
+        c = b - m * a
+        boundary_V = min(Vg) if m < 0 else max(Vg)
+        ax.plot([boundary_V, -c/m], [m*boundary_V+c, 0],
+                linestyle='dotted', color='red')
+        # Calculate mobility and print result
+        mu = d / (epsilon_0 * epsilon_r * Vsd) * abs(m)
+        print(f"mobility {mu*1e4:e} cm^2 V^-1 s^-1", end=' ')
+        print(f"(with x-axis intercept at {-c/m:.2f} V),", end=' ')
+    print()
+    # Mobility from maximum gradient of Isd(Vg) curve (local to V_dirac):
+    # find the two turning points of the gradient either side of V_dirac
+    gradient2 = np.gradient(np.abs(gradient), Vg)
+    # the +/-0.5 below is for insurance.
+    linear_index_1 = np.nonzero((Vg < V_dirac-0.5) & (gradient2 > 0))[0][-1]
+    linear_index_2 = np.nonzero((Vg > V_dirac+0.5) & (gradient2 < 0))[0][0]
+    print("The maximum gradient implies:", end=' ')
+    for i in (linear_index_1, linear_index_2):
+        # Plot extrapolations to Isd = 0
+        m, a, b = gradient[i], Vg[i], Isd[i]
+        c = b - m * a
+        boundary_V = min(Vg) if m < 0 else max(Vg)
+        ax.plot([Vg[i]], [Isd[i]], 'bx')
+        ax.plot([boundary_V, -c/m], [m*boundary_V+c, 0],
+                linestyle='dotted', color='blue')
+        # Calculate mobility and print result
+        mu = d / (epsilon_0 * epsilon_r * Vsd) * abs(m)
+        print(f"mobility {mu*1e4:e} cm^2 V^-1 s^-1", end=' ')
+        print(f"(with x-axis intercept at {-c/m:.2f} V),", end=' ')
+    print()
+for ax in (ax1, ax2):
+    ax.set_xlabel("Gate voltage, $V_g$ (V)")
+    ax.set_ylabel("Source-drain current, $I_{sd}$ (A)")
     ax.legend()
 
 plt.show()
