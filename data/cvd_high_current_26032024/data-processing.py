@@ -45,7 +45,7 @@ for ax in axes[:, 0]:
 for ax in axes[:, 1]:
     ax.set_title("Device 2 - Perovskite Nanocrystals")
 for ax_1, ax_2, number, in zip(axes[0], axes[1], device_numbers):
-    Iph = []
+    Iph, dIph = [], []
     for Vsd in channel_voltages:
         filename = f"CVD{number}F-time-{Vsd}mV.dat"
         if Vsd in (10, 50):
@@ -60,12 +60,14 @@ for ax_1, ax_2, number, in zip(axes[0], axes[1], device_numbers):
         #       I think it's close enough though.
         photocurrents = np.abs(current[index_2] - current[index_1])
         Iph.append(np.mean(photocurrents))
+        dIph.append(np.std(photocurrents))
     ax_2.plot(channel_voltages, Iph, 'bo', label='Datapoints')
     (m, c), cv = curve_fit(linear_fit, channel_voltages, Iph)
     dm = np.sqrt(cv[0, 0])  # uncertainty in gradient
     ax_2.plot(channel_voltages, m*channel_voltages+c, 'k-', label='Linear fit')
     m, dm = m * 1e3, dm * 1e3  # Convert from A/mV -> A/V for printing
     print(f"Gradient of I_ph(V_g) for Device {number}: {m:e} ± {dm:e} A/V.")
+    print(f"At 300 mV, I_ph for Device {number} is {Iph[4]:e} ± {dIph[4]:e} A")
 for ax in axes[0]:
     ax.set_xlabel("Time, $t$ (s)")
     ax.set_ylabel("Source-drain current, $I_{sd}$ (A)")
@@ -95,6 +97,8 @@ file_table = (
 )
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+ax1.set_title("Device 1 - Quantum Dots")
+ax2.set_title("Device 2 - Perovskite Nanocrystals")
 for ax, file_info in zip((ax1, ax1, ax2, ax2), file_table):
     print()
     Vg, Isd = np.loadtxt(file_info[0], delimiter='\t', usecols=(0, 3), unpack=True)
