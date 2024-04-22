@@ -17,8 +17,8 @@ the OFET data directories.
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 axes = (ax1, ax2)
-devices = ("OFET3", "OFET4")
-directories = ("data/ofet3_16022024/", "data/ofet4_23022024/")
+devices = ("OFET4", "OFET3")
+directories = ("data/ofet4_23022024/", "data/ofet3_16022024/")
 conditions = ("Bare", "Dark", "Light")
 graph_labels = ("Before functionalisation", "Dark conditions", "Light conditions")
 for device, ax, directory in zip(devices, axes, directories):
@@ -37,8 +37,8 @@ for device, ax, directory in zip(devices, axes, directories):
     ax.set_xlabel("Source-drain voltage, $V_{sd}$ (V)")
     ax.set_ylabel("Source-drain current, $I_{sd}$ (nA)")
     ax.legend()
-ax1.set_title("OFET Functionalised with Perovskites")
-ax2.set_title("OFET Functionalised with Quantum Dots")
+ax1.set_title("OFET Functionalised with Quantum Dots")
+ax2.set_title("OFET Functionalised with Perovskites")
 fig.tight_layout()
 
 """
