@@ -82,6 +82,11 @@ for filename, label, data_wealth in file_info:
         gradient = np.gradient(sigma, Vg)
         gradient_pad = np.pad(gradient, (width-1)//2, mode='edge')
         gradient_smooth = np.convolve(gradient_pad, top_hat(width), mode='valid')
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+        fig.suptitle(f"{filename}, pass {p_num}")
+        ax1.plot(Vg, sigma)
+        ax2.plot(Vg, gradient)
+        ax2.plot(Vg, gradient_smooth)
         gradient2 = np.gradient(np.abs(gradient_smooth), Vg)
         max_grad_index = np.nonzero((Vg < Vg[np.argmin(sigma)]) &
                                     (gradient2 > 0))[0][-1]
@@ -103,24 +108,71 @@ for filename, label, data_wealth in file_info:
         p0 = (epsilon_0 * epsilon_r) / (e * d) * -c/m
         p0_err = p0 * np.sqrt((dc/c)**2 + (dm/m)**2)
 
-        # # Calculating additional results when the Dirac point is observed
-        # if data_wealth < 2:
-        #     continue
-        # p0 = (epsilon_0 * epsilon_r) / (e * d) * Vg[np.argmax(rho)]
-        # p0_err = (epsilon_0 * epsilon_r) / (e * d) * dVg
-        # rho_max = np.max(rho)
-        # halfmax_index = np.argmin(np.abs(rho - rho_max/2))
-        # near_gradients = gradient[halfmax_index-5: halfmax_index+6]
-        # mu_halfmax = d/(epsilon_0 * epsilon_r) * np.mean(near_gradients)
-        # mu_halfmax_err = d/(epsilon_0 * epsilon_r) * np.std(near_gradients)
-
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-        ax1.plot(Vg, sigma)
-        ax2.plot(Vg, gradient)
-        ax2.plot(Vg, gradient_smooth)
         ax1.plot([a], [b], 'bx')
         ax1.plot([min(Vg), -c/m], [m*min(Vg)+c, 0], 'k--')
-        fig.suptitle(filename)
+
+        # Calculating additional results when the Dirac point is observed
+        if data_wealth < 2:
+            continue
+        V_dirac = Vg[np.argmax(rho)]
+        p0 = (epsilon_0 * epsilon_r) / (e * d) * V_dirac
+        p0_err = (epsilon_0 * epsilon_r) / (e * d) * dVg
+        rho_max = np.max(rho)
+        # If the file under analysis has both sides of N.P. visable, we only
+        # want to consider the left one for now.
+        halfmax_index = np.argmin(np.abs(rho * [Vg < V_dirac] - rho_max/2))
+        near_gradients = gradient[halfmax_index-5: halfmax_index+6]
+        mu_halfmax = d/(epsilon_0 * epsilon_r) * np.mean(near_gradients)
+        mu_halfmax_err = d/(epsilon_0 * epsilon_r) * np.std(near_gradients)
+        Vg_deviation = a / Vg[halfmax_index] - 1
+        mu_deviation = mu_max / mu_halfmax - 1
+
+        # Calculating additional results when there's plenty of data to the
+        # right of the Dirac point.
+        if data_wealth < 3:
+            continue
+        try:
+            max_grad_index = np.nonzero((Vg > V_dirac + 0.5) &
+                                        (gradient2 < 0))[0][0]
+        except:  # Some files need a different approach
+            max_grad_index = np.nonzero((Vg > V_dirac + 0.5) &
+                                        (gradient2 > 0))[0][-1]
+        # Calculate the max gradient from a small region around this point
+        near_gradients = gradient[max_grad_index-5:
+                                  min(max_grad_index+6, len(gradient))]
+        near_sigmas = sigma[max_grad_index-5:
+                            min(max_grad_index+6, len(gradient))]
+        near_Vgs = Vg[max_grad_index-5: min(max_grad_index+6, len(gradient))]
+
+        # Parameters for graphical plot of chosen point and their uncertainties
+        m, a, b = np.mean((near_gradients, near_Vgs, near_sigmas), axis=1)
+        dm, da, db = np.std((near_gradients, near_Vgs, near_sigmas), axis=1)
+        c = b - m * a
+        dc = np.sqrt(db**2 + (dm/a)**2 + (da/m)**2)
+        # Calculate the mobility and extrapolate a carrier density estimate
+        mu_max = d/(epsilon_0 * epsilon_r) * abs(m)
+        mu_max_err = d/(epsilon_0 * epsilon_r) * dm
+        # p0 = (epsilon_0 * epsilon_r) / (e * d) * -c/m
+        # p0_err = p0 * np.sqrt((dc/c)**2 + (dm/m)**2)
+
+        ax1.plot([a], [b], 'bx')
+        ax1.plot([max(Vg), -c/m], [m*max(Vg)+c, 0], 'k--')
+
+        # Additional FWHM calculations, not possible for device 2
+        if device == 2:
+            continue
+        halfmax_index_2 = np.argmin(np.abs(rho * [Vg > V_dirac] - rho_max/2))
+        near_gradients = gradient[halfmax_index_2-5: halfmax_index_2+6]
+        mu_halfmax = d/(epsilon_0 * epsilon_r) * np.mean(near_gradients)
+        mu_halfmax_err = d/(epsilon_0 * epsilon_r) * np.std(near_gradients)
+        Vg_deviation = a / Vg[halfmax_index_2] - 1
+        mu_deviation = mu_max / mu_halfmax - 1
+        # VWHM stuff and 3-point mobility calculation
+        V_FWHM = Vg[halfmax_index_2] - Vg[halfmax_index]
+        delta_n = V_FWHM * (epsilon_0 * epsilon_r) / (e * d)
+        mu_3p = 4 / (e * delta_n * rho_max)
+
+
     #     V_dirac_visible = Isd[-1] != min(Isd)
     #     if V_dirac_visible:
     #         dirac_voltages.append(Vg[np.argmin(Isd)])
