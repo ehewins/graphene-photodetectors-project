@@ -74,7 +74,6 @@ for filename, displayname, data_wealth in file_info:
     Vg_data, Isd_data = np.loadtxt(filename, usecols=(0, 3), unpack=True)
     datapoints_per_pass = int((max(Vg_data) - min(Vg_data)) / dVg)
     num_passes = int(len(Vg_data) / datapoints_per_pass)
-    dirac_voltages = []
     for p_num in range(0, num_passes, 2):  # only study the forward passes
         start_index = p_num * datapoints_per_pass
         stop_index = (p_num + 1) * datapoints_per_pass
@@ -140,8 +139,10 @@ for filename, displayname, data_wealth in file_info:
             halfmax_index_2 = np.argmin(np.abs(rho * [Vg > V_dirac] - rho_max/2))
             # ax1.plot([Vg[halfmax_index_2]], [sigma[halfmax_index_2]], 'rx')
             V_FWHM = Vg[halfmax_index_2] - Vg[halfmax_index]
-        else:
+        elif device == 2:
             V_FWHM = 2 * (V_dirac - Vg[halfmax_index])
+        else:
+            V_FWHM = np.nan  # for Device 1, 19/03 (1)
         # VWHM stuff and 3-point mobility calculation
         delta_n = V_FWHM * (epsilon_0 * epsilon_r) / (e * d)
         mu_3p = 4 / (e * delta_n * rho_max)
@@ -199,29 +200,140 @@ for filename, displayname, data_wealth in file_info:
             light2_data = np.append(light2_data, [results], axis=0)
             light2_names.append(displayname)
 
+# Create arrays for the final value of each parameter in each condition
+# the standard deviation of the measurements leading up to that final value.
+dark1_mu_max_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                          else np.nan for row in dark1_data[:, 0, :]])
+dark1_dirac_V_extrap = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                                else np.nan for row in dark1_data[:, 1, :]])
+dark1_dirac_V = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                         else np.nan for row in dark1_data[:, 2, :]])
+dark1_rho_max = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                         else np.nan for row in dark1_data[:, 3, :]])
+dark1_delta_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                         else np.nan for row in dark1_data[:, 4, :]])
+dark1_mu_3p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                       else np.nan for row in dark1_data[:, 5, :]])
+dark1_mu_FWHM_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in dark1_data[:, 6, :]])
+dark1_V_diff_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                          else np.nan for row in dark1_data[:, 7, :]])
+dark1_mu_max_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                          else np.nan for row in dark1_data[:, 8, :]])
+dark1_mu_FWHM_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in dark1_data[:, 9, :]])
+dark1_V_diff_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                          else np.nan for row in dark1_data[:, 10, :]])
+dark1_mu_max_p_err = np.nanstd(dark1_data[:, 0, :], axis=1)
+dark1_dirac_V_extrap_err = np.nanstd(dark1_data[:, 1, :], axis=1)
+dark1_dirac_V_err = np.nanstd(dark1_data[:, 2, :], axis=1)
+dark1_rho_max_err = np.nanstd(dark1_data[:, 3, :], axis=1)
+dark1_delta_n_err = np.nanstd(dark1_data[:, 4, :], axis=1)
+dark1_mu_3p_err = np.nanstd(dark1_data[:, 5, :], axis=1)
+dark1_mu_FWHM_p_err = np.nanstd(dark1_data[:, 6, :], axis=1)
+dark1_V_diff_p_err = np.nanstd(dark1_data[:, 7, :], axis=1)
+dark1_mu_max_n_err = np.nanstd(dark1_data[:, 8, :], axis=1)
+dark1_mu_FWHM_n_err = np.nanstd(dark1_data[:, 9, :], axis=1)
+dark1_V_diff_n_err = np.nanstd(dark1_data[:, 10, :], axis=1)
+light1_mu_max_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                            else np.nan for row in light1_data[:, 0, :]])
+light1_dirac_V_extrap = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                                  else np.nan for row in light1_data[:, 1, :]])
+light1_dirac_V = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in light1_data[:, 2, :]])
+light1_rho_max = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in light1_data[:, 3, :]])
+light1_delta_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in light1_data[:, 4, :]])
+light1_mu_3p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                         else np.nan for row in light1_data[:, 5, :]])
+light1_mu_FWHM_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                             else np.nan for row in light1_data[:, 6, :]])
+light1_V_diff_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                            else np.nan for row in light1_data[:, 7, :]])
+light1_mu_max_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                            else np.nan for row in light1_data[:, 8, :]])
+light1_mu_FWHM_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                             else np.nan for row in light1_data[:, 9, :]])
+light1_V_diff_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                            else np.nan for row in light1_data[:, 10, :]])
+light1_mu_max_p_err = np.nanstd(light1_data[:, 0, :], axis=1)
+light1_dirac_V_extrap_err = np.nanstd(light1_data[:, 1, :], axis=1)
+light1_dirac_V_err = np.nanstd(light1_data[:, 2, :], axis=1)
+light1_rho_max_err = np.nanstd(light1_data[:, 3, :], axis=1)
+light1_delta_n_err = np.nanstd(light1_data[:, 4, :], axis=1)
+light1_mu_3p_err = np.nanstd(light1_data[:, 5, :], axis=1)
+light1_mu_FWHM_p_err = np.nanstd(light1_data[:, 6, :], axis=1)
+light1_V_diff_p_err = np.nanstd(light1_data[:, 7, :], axis=1)
+light1_mu_max_n_err = np.nanstd(light1_data[:, 8, :], axis=1)
+light1_mu_FWHM_n_err = np.nanstd(light1_data[:, 9, :], axis=1)
+light1_V_diff_n_err = np.nanstd(light1_data[:, 10, :], axis=1)
+dark2_mu_max_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                          else np.nan for row in dark2_data[:, 0, :]])
+dark2_dirac_V_extrap = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                                else np.nan for row in dark2_data[:, 1, :]])
+dark2_dirac_V = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                         else np.nan for row in dark2_data[:, 2, :]])
+dark2_rho_max = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                         else np.nan for row in dark2_data[:, 3, :]])
+dark2_delta_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                         else np.nan for row in dark2_data[:, 4, :]])
+dark2_mu_3p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                       else np.nan for row in dark2_data[:, 5, :]])
+dark2_mu_FWHM_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in dark2_data[:, 6, :]])
+dark2_V_diff_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                          else np.nan for row in dark2_data[:, 7, :]])
+dark2_mu_max_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                          else np.nan for row in dark2_data[:, 8, :]])
+dark2_mu_max_p_err = np.nanstd(dark2_data[:, 0, :], axis=1)
+dark2_dirac_V_extrap_err = np.nanstd(dark2_data[:, 1, :], axis=1)
+dark2_dirac_V_err = np.nanstd(dark2_data[:, 2, :], axis=1)
+dark2_rho_max_err = np.nanstd(dark2_data[:, 3, :], axis=1)
+dark2_delta_n_err = np.nanstd(dark2_data[:, 4, :], axis=1)
+dark2_mu_3p_err = np.nanstd(dark2_data[:, 5, :], axis=1)
+dark2_mu_FWHM_p_err = np.nanstd(dark2_data[:, 6, :], axis=1)
+dark2_V_diff_p_err = np.nanstd(dark2_data[:, 7, :], axis=1)
+dark2_mu_max_n_err = np.nanstd(dark2_data[:, 8, :], axis=1)
+light2_mu_max_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                            else np.nan for row in light2_data[:, 0, :]])
+light2_dirac_V_extrap = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                                  else np.nan for row in light2_data[:, 1, :]])
+light2_dirac_V = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in light2_data[:, 2, :]])
+light2_rho_max = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in light2_data[:, 3, :]])
+light2_delta_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                           else np.nan for row in light2_data[:, 4, :]])
+light2_mu_3p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                         else np.nan for row in light2_data[:, 5, :]])
+light2_mu_FWHM_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                             else np.nan for row in light2_data[:, 6, :]])
+light2_V_diff_p = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                            else np.nan for row in light2_data[:, 7, :]])
+light2_mu_max_n = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
+                            else np.nan for row in light2_data[:, 8, :]])
+light2_mu_max_p_err = np.nanstd(light2_data[:, 0, :], axis=1)
+light2_dirac_V_extrap_err = np.nanstd(light2_data[:, 1, :], axis=1)
+light2_dirac_V_err = np.nanstd(light2_data[:, 2, :], axis=1)
+light2_rho_max_err = np.nanstd(light2_data[:, 3, :], axis=1)
+light2_delta_n_err = np.nanstd(light2_data[:, 4, :], axis=1)
+light2_mu_3p_err = np.nanstd(light2_data[:, 5, :], axis=1)
+light2_mu_FWHM_p_err = np.nanstd(light2_data[:, 6, :], axis=1)
+light2_V_diff_p_err = np.nanstd(light2_data[:, 7, :], axis=1)
+light2_mu_max_n_err = np.nanstd(light2_data[:, 8, :], axis=1)
+
 # Create plot showing how the Dirac voltage has varied between measurements
-dark1_dirac_Vs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in dark1_data[:, 2, :]])
-dark1_dirac_V_errs = np.nanstd(dark1_data[:, 2, :], axis=1)
-light1_dirac_Vs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                            else np.nan for row in light1_data[:, 2, :]])
-light1_dirac_V_errs = np.nanstd(light1_data[:, 2, :], axis=1)
-dark2_dirac_Vs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in dark2_data[:, 2, :]])
-dark2_dirac_V_errs = np.nanstd(dark2_data[:, 2, :], axis=1)
-light2_dirac_Vs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                            else np.nan for row in light2_data[:, 2, :]])
-light2_dirac_V_errs = np.nanstd(light2_data[:, 2, :], axis=1)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 ax1.set_title("Device 1 - Functionalised with Quantum Dots")
 ax2.set_title("Device 2 - Functionalised with Perovskites")
 for ax in (ax1, ax2):
     ax.set_xlabel("Measurement set label \n(date and number)")
     ax.set_ylabel("Dirac voltage, $V_{Dirac}$ (V)")
-ax1.errorbar(dark1_names, dark1_dirac_Vs, yerr=dark1_dirac_V_errs, color='C0', ecolor='C3', fmt='o', capsize=4)
-ax1.errorbar(light1_names, light1_dirac_Vs, yerr=light1_dirac_V_errs, color='C2', ecolor='C3', fmt='o', capsize=4)
-ax2.errorbar(dark2_names, dark2_dirac_Vs, yerr=dark2_dirac_V_errs, label='Dark conditions', color='C0', ecolor='C3', fmt='o', capsize=4)
-ax2.errorbar(light2_names, light2_dirac_Vs, yerr=light2_dirac_V_errs, label='Light conditions', color='C2', ecolor='C3', fmt='o', capsize=4)
+ax1.errorbar(dark1_names, dark1_dirac_V, yerr=dark1_dirac_V_err, color='C0', ecolor='C3', fmt='o', capsize=4)
+ax1.errorbar(light1_names, light1_dirac_V, yerr=light1_dirac_V_err, color='C2', ecolor='C3', fmt='o', capsize=4)
+ax2.errorbar(dark2_names, dark2_dirac_V, yerr=dark2_dirac_V_err, label='Dark conditions', color='C0', ecolor='C3', fmt='o', capsize=4)
+ax2.errorbar(light2_names, light2_dirac_V, yerr=light2_dirac_V_err, label='Light conditions', color='C2', ecolor='C3', fmt='o', capsize=4)
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
          dark1_data[:, 2, :].flatten(), '.', color='C0')
@@ -235,28 +347,16 @@ fig.legend()
 
 # Create plot showing how the hole mobilities have varied between measurements
 # (mobilities determined from maximum gradient)
-dark1_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark1_data[:, 0, :]])
-dark1_mu_max_errs = np.nanstd(dark1_data[:, 0, :], axis=1)
-light1_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light1_data[:, 0, :]])
-light1_mu_max_errs = np.nanstd(light1_data[:, 0, :], axis=1)
-dark2_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark2_data[:, 0, :]])
-dark2_mu_max_errs = np.nanstd(dark2_data[:, 0, :], axis=1)
-light2_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light2_data[:, 0, :]])
-light2_mu_max_errs = np.nanstd(light2_data[:, 0, :], axis=1)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 ax1.set_title("Device 1 - Functionalised with Quantum Dots")
 ax2.set_title("Device 2 - Functionalised with Perovskites")
 for ax in (ax1, ax2):
     ax.set_xlabel("Measurement set label \n(date and number)")
     ax.set_ylabel("Hole mobility, $\\mu_p$ (cm$^2$ V${^-1}$ s$^{-1}$)")
-ax1.errorbar(dark1_names, dark1_mu_maxes*1e4, yerr=dark1_mu_max_errs*1e4, color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax1.errorbar(light1_names, light1_mu_maxes*1e4, yerr=light1_mu_max_errs*1e4, color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax2.errorbar(dark2_names, dark2_mu_maxes*1e4, yerr=dark2_mu_max_errs*1e4, label='$\\mu_{max}$, Dark conditions', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax2.errorbar(light2_names, light2_mu_maxes*1e4, yerr=light2_mu_max_errs*1e4, label='$\\mu_{max}$, Light conditions', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax1.errorbar(dark1_names, dark1_mu_max_p*1e4, yerr=dark1_mu_max_p_err*1e4, color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax1.errorbar(light1_names, light1_mu_max_p*1e4, yerr=light1_mu_max_p_err*1e4, color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax2.errorbar(dark2_names, dark2_mu_max_p*1e4, yerr=dark2_mu_max_p_err*1e4, label='$\\mu_{max}$, Dark conditions', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax2.errorbar(light2_names, light2_mu_max_p*1e4, yerr=light2_mu_max_p_err*1e4, label='$\\mu_{max}$, Light conditions', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
          dark1_data[:, 0, :].flatten()*1e4, 'o', color='C0', markersize=3)
@@ -267,22 +367,10 @@ ax2.plot(np.tile(np.array([dark2_names]).T, 4).flatten(),
 ax2.plot(np.tile(np.array([light2_names]).T, 4).flatten(),
          light2_data[:, 0, :].flatten()*1e4, 'o', color='C2', markersize=3)
 # On the same plot, show the mobilities at the FWHM
-dark1_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark1_data[:, 6, :]])
-dark1_mu_FWHM_errs = np.nanstd(dark1_data[:, 6, :], axis=1)
-light1_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light1_data[:, 6, :]])
-light1_mu_FWHM_errs = np.nanstd(light1_data[:, 6, :], axis=1)
-dark2_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark2_data[:, 6, :]])
-dark2_mu_FWHM_errs = np.nanstd(dark2_data[:, 6, :], axis=1)
-light2_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light2_data[:, 6, :]])
-light2_mu_FWHM_errs = np.nanstd(light2_data[:, 6, :], axis=1)
-ax1.errorbar(dark1_names, dark1_mu_FWHMs*1e4, yerr=dark1_mu_FWHM_errs*1e4, color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
-ax1.errorbar(light1_names, light1_mu_FWHMs*1e4, yerr=light1_mu_FWHM_errs*1e4, color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
-ax2.errorbar(dark2_names, dark2_mu_FWHMs*1e4, yerr=dark2_mu_FWHM_errs*1e4, label='$\\mu_{FWHM}$, Dark conditions', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
-ax2.errorbar(light2_names, light2_mu_FWHMs*1e4, yerr=light2_mu_FWHM_errs*1e4, label='$\\mu_{FWHM}$, Light conditions', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax1.errorbar(dark1_names, dark1_mu_FWHM_p*1e4, yerr=dark1_mu_FWHM_p_err*1e4, color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax1.errorbar(light1_names, light1_mu_FWHM_p*1e4, yerr=light1_mu_FWHM_p_err*1e4, color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax2.errorbar(dark2_names, dark2_mu_FWHM_p*1e4, yerr=dark2_mu_FWHM_p_err*1e4, label='$\\mu_{FWHM}$, Dark conditions', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax2.errorbar(light2_names, light2_mu_FWHM_p*1e4, yerr=light2_mu_FWHM_p_err*1e4, label='$\\mu_{FWHM}$, Light conditions', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
 fig.legend()
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
@@ -295,28 +383,16 @@ ax2.plot(np.tile(np.array([light2_names]).T, 4).flatten(),
          light2_data[:, 6, :].flatten()*1e4, '^', color='C2', markersize=3)
 
 # Create plot showing how the electron mobilities have varied between measurements
-dark1_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark1_data[:, 8, :]])
-dark1_mu_max_errs = np.nanstd(dark1_data[:, 8, :], axis=1)
-light1_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light1_data[:, 8, :]])
-light1_mu_max_errs = np.nanstd(light1_data[:, 8, :], axis=1)
-dark2_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark2_data[:, 8, :]])
-dark2_mu_max_errs = np.nanstd(dark2_data[:, 8, :], axis=1)
-light2_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light2_data[:, 8, :]])
-light2_mu_max_errs = np.nanstd(light2_data[:, 8, :], axis=1)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 ax1.set_title("Device 1 - Functionalised with Quantum Dots")
 ax2.set_title("Device 2 - Functionalised with Perovskites")
 for ax in (ax1, ax2):
     ax.set_xlabel("Measurement set label \n(date and number)")
     ax.set_ylabel("Electron mobility, $\\mu_n$ (cm$^2$ V${^-1}$ s$^{-1}$)")
-ax1.errorbar(dark1_names, dark1_mu_maxes*1e4, yerr=dark1_mu_max_errs*1e4, color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax1.errorbar(light1_names, light1_mu_maxes*1e4, yerr=light1_mu_max_errs*1e4, color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax2.errorbar(dark2_names, dark2_mu_maxes*1e4, yerr=dark2_mu_max_errs*1e4, label='$\\mu_{max}$, Dark conditions', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax2.errorbar(light2_names, light2_mu_maxes*1e4, yerr=light2_mu_max_errs*1e4, label='$\\mu_{max}$, Light conditions', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax1.errorbar(dark1_names, dark1_mu_max_n*1e4, yerr=dark1_mu_max_n_err*1e4, color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax1.errorbar(light1_names, light1_mu_max_n*1e4, yerr=light1_mu_max_n_err*1e4, color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax2.errorbar(dark2_names, dark2_mu_max_n*1e4, yerr=dark2_mu_max_n_err*1e4, label='$\\mu_{max}$, Dark conditions', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax2.errorbar(light2_names, light2_mu_max_n*1e4, yerr=light2_mu_max_n_err*1e4, label='$\\mu_{max}$, Light conditions', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
          dark1_data[:, 8, :].flatten()*1e4, 'o', color='C0', markersize=3)
@@ -327,14 +403,8 @@ ax2.plot(np.tile(np.array([dark2_names]).T, 4).flatten(),
 ax2.plot(np.tile(np.array([light2_names]).T, 4).flatten(),
          light2_data[:, 8, :].flatten()*1e4, 'o', color='C2', markersize=3)
 # On the same plot, show the mobilities at the FWHM
-dark1_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark1_data[:, 9, :]])
-dark1_mu_FWHM_errs = np.nanstd(dark1_data[:, 9, :], axis=1)
-light1_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light1_data[:, 9, :]])
-light1_mu_FWHM_errs = np.nanstd(light1_data[:, 9, :], axis=1)
-ax1.errorbar(dark1_names, dark1_mu_FWHMs*1e4, yerr=dark1_mu_FWHM_errs*1e4, label='$\\mu_{FWHM}$, Dark conditions', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
-ax1.errorbar(light1_names, light1_mu_FWHMs*1e4, yerr=light1_mu_FWHM_errs*1e4, label='$\\mu_{FWHM}$, Light conditions', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax1.errorbar(dark1_names, dark1_mu_FWHM_n*1e4, yerr=dark1_mu_FWHM_n_err*1e4, label='$\\mu_{FWHM}$, Dark conditions', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax1.errorbar(light1_names, light1_mu_FWHM_n*1e4, yerr=light1_mu_FWHM_n_err*1e4, label='$\\mu_{FWHM}$, Light conditions', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
 fig.legend()
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
@@ -343,414 +413,274 @@ ax1.plot(np.tile(np.array([light1_names]).T, 4).flatten(),
          light1_data[:, 9, :].flatten()*1e4, '^', color='C2', markersize=3)
 fig.legend()
 
+# Calculating some extra parameters:
+# Overshoot in V_dirac estimate vs. actual V_dirac (when both are measured)
+dark1_dirac_V_overshoots = np.abs(dark1_dirac_V_extrap - dark1_dirac_V)
+light1_dirac_V_overshoots = np.abs(light1_dirac_V_extrap - light1_dirac_V)
+dark2_dirac_V_overshoots = np.abs(dark2_dirac_V_extrap - dark2_dirac_V)
+light2_dirac_V_overshoots = np.abs(light2_dirac_V_extrap - light2_dirac_V)
+# Comparing maximum (hole) mobility to the 3-point mobility
+dark1_mu_3p_diffs = np.abs(dark1_mu_3p / dark1_mu_max_p - 1)
+light1_mu_3p_diffs = np.abs(light1_mu_3p / light1_mu_max_p - 1)
+dark2_mu_3p_diffs = np.abs(dark2_mu_3p / dark2_mu_max_p - 1)
+light2_mu_3p_diffs = np.abs(light2_mu_3p / light2_mu_max_p - 1)
+# Comparing (numerically) the agreement between mu_max and mu_FWHM
+# First for hole mobility
+dark1_mu_FWHM_p_diffs = np.abs(dark1_mu_FWHM_p / dark1_mu_max_p - 1)
+light1_mu_FWHM_p_diffs = np.abs(light1_mu_FWHM_p / light1_mu_max_p - 1)
+dark2_mu_FWHM_p_diffs = np.abs(dark2_mu_FWHM_p / dark2_mu_max_p - 1)
+light2_mu_FWHM_p_diffs = np.abs(light2_mu_FWHM_p / light2_mu_max_p - 1)
+# Second for electron mobility (device 1 only)
+dark1_mu_FWHM_n_diffs = np.abs(dark1_mu_FWHM_n / dark1_mu_max_n - 1)
+light1_mu_FWHM_n_diffs = np.abs(light1_mu_FWHM_n / light1_mu_max_n - 1)
+
 # Print results of how other properties were effected by the long experiments
 # First define which experiments took place before the long experiment:
 dark1_prelong = np.array([int(date[:2]) < 22 for date in dark1_names])
 light1_prelong = np.array([int(date[:2]) < 22 for date in light1_names])
 dark2_prelong = np.array([int(date[:2]) < 22 for date in dark2_names])
 light2_prelong = np.array([int(date[:2]) < 22 for date in light2_names])
-# Then extract values from the storage arrays
-dark1_rhos = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                       else np.nan for row in dark1_data[:, 3, :]])
-light1_rhos = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                        else np.nan for row in light1_data[:, 3, :]])
-dark2_rhos = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                       else np.nan for row in dark2_data[:, 3, :]])
-light2_rhos = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                        else np.nan for row in light2_data[:, 3, :]])
-dark1_delta_ns = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in dark1_data[:, 4, :]])
-light1_delta_ns = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                            else np.nan for row in light1_data[:, 4, :]])
-dark2_delta_ns = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in dark2_data[:, 4, :]])
-light2_delta_ns = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                            else np.nan for row in light2_data[:, 4, :]])
-dark1_mu_3ps = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                         else np.nan for row in dark1_data[:, 5, :]])
-light1_mu_3ps = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in light1_data[:, 5, :]])
-dark2_mu_3ps = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                         else np.nan for row in dark2_data[:, 5, :]])
-light2_mu_3ps = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in light2_data[:, 5, :]])
-dark1_V_diffs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                         else np.nan for row in dark1_data[:, 7, :]])
-light1_V_diffs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in light1_data[:, 7, :]])
-dark2_V_diffs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                         else np.nan for row in dark2_data[:, 7, :]])
-light2_V_diffs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in light2_data[:, 7, :]])
+
+# Names to print when analysing various parameters
+parameter_titles = ("Dirac voltage", "V_Dirac extrapolation overshoot",
+                    "Max resistivity", "Carrier density FMHM",
+                    "Max mobility (p)", "Max mobility (n)", "3-point mobility",
+                    "%-difference mu_3p vs. mu_max (p)",
+                    "FWHM mobility (p)", "FWHM mobility (n)",
+                    "Max-mobility/FWHM voltage difference (p)",
+                    "Max-mobility/FWHM voltage difference (n)",
+                    "%-difference mu_max vs mu_FWHM (p)",
+                    "%-difference mu_max vs mu_FWHM (n)")
+# The units of these parameters
+parameter_units = ("V", "V", "Ω/□", "cm^-2", "cm^2 V^-1 s^-1",
+                   "cm^2 V^-1 s^-1", "cm^2 V^-1 s^-1", "%", "cm^2 V^-1 s^-1",
+                   "cm^2 V^-1 s^-1", "V", "V", "%", "%")
+# The parameters themselves, scaled where necessary to match units
+parameters = ((dark1_dirac_V, light1_dirac_V, dark2_dirac_V, light2_dirac_V),
+              (dark1_dirac_V_overshoots, light1_dirac_V_overshoots,
+               dark2_dirac_V_overshoots, light2_dirac_V_overshoots),
+              (dark1_rho_max, light1_rho_max, dark2_rho_max, light2_rho_max),
+              (1e-4*dark1_delta_n, 1e-4*light1_delta_n, 1e-4*dark2_delta_n,
+               1e-4*light2_delta_n),
+              (1e4*dark1_mu_max_p, 1e4*light1_mu_max_p, 1e4*dark2_mu_max_p,
+               1e4*light2_mu_max_p),
+              (1e4*dark1_mu_max_n, 1e4*light1_mu_max_n, 1e4*dark2_mu_max_n,
+               1e4*light2_mu_max_n),
+              (1e4*dark1_mu_3p, 1e4*light1_mu_3p, 1e4*dark2_mu_3p,
+               1e4*light2_mu_3p),
+              (100*dark1_mu_3p_diffs, 100*light1_mu_3p_diffs,
+               100*dark2_mu_3p_diffs, 100*light2_mu_3p_diffs),
+              (1e4*dark1_mu_FWHM_p, 1e4*light1_mu_FWHM_p, 1e4*dark2_mu_FWHM_p,
+               1e4*light2_mu_FWHM_p),
+              (1e4*dark1_mu_FWHM_n, 1e4*light1_mu_FWHM_n),
+              (dark1_V_diff_p, light1_V_diff_p, dark2_V_diff_p, light2_V_diff_p),
+              (dark1_V_diff_n, light1_V_diff_n),
+              (100*dark1_mu_FWHM_p_diffs, 100*light1_mu_FWHM_p_diffs,
+               100*dark2_mu_FWHM_p_diffs, 100*light2_mu_FWHM_p_diffs),
+              (100*dark1_mu_FWHM_n_diffs, 100*light1_mu_FWHM_n_diffs))
+setups = ("Device 1 (dark conditions)", "Device 1 (light conditions)",
+          "Device 2 (dark conditions)", "Device 2 (light conditions)")
+selectors = (dark1_prelong, light1_prelong, dark2_prelong, light2_prelong)
+for title, unit, param_set in zip(parameter_titles, parameter_units, parameters):
+    print()
+    print(f"Changes in average measured {title} due to the long experiments:")
+    for param, setup, selector in zip(param_set, setups, selectors):
+        before = np.nanmean(param[selector])
+        before_err = np.nanstd(param[selector])
+        after = np.nanmean(param[~selector])
+        after_err = np.nanstd(param[~selector])
+        total = np.nanmean(param)
+        total_err = np.nanstd(param)
+        print(f"{setup}: {before:.2e} ± {before_err:.2e} -> " +
+              f"{after:.2e} ± {after_err:.2e} {unit} ")
+        print(f"(Overall: {total:.2e} ± {total_err:.2e} {unit})")
+
+"""
+Objective 2:
+Create graphs showing conductivity and resistivity traces to provide
+illustration of some of the physical processes.
+"""
+
+# Plots showing the shift in the Dirac peak due to light exposure
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+files = ("data/cvd_func_19032024/CVD1F-Isd-Vg-Dark-25max.dat",
+         "data/cvd_func_19032024/CVD1F-Isd-Vg-Light-25max.dat",
+         "data/cvd_func_19032024/CVD1F-Isd-Vg-Dark-25max-2.dat",
+         "data/cvd_func_19032024/CVD1F-Isd-Vg-Light-25max-2.dat",
+         "data/cvd_func_19032024/CVD2F-Isd-Vg-Dark-35max.dat",
+         "data/cvd_func_19032024/CVD2F-Isd-Vg-Light-35max.dat",
+         "data/cvd_func_19032024/CVD2F-Isd-Vg-Dark-35max-2.dat",
+         "data/cvd_func_19032024/CVD2F-Isd-Vg-Light-35max-2.dat")
+
+for filename in files:
+    device = filename[26]  # strings '1' or '2'
+    conditions = "Dark" if filename[36] == "D" else "Light"
+    Vg_data, Isd_data = np.loadtxt(filename, usecols=(0, 3), unpack=True)
+    datapoints_per_pass = int((max(Vg_data) - min(Vg_data)) / dVg)
+    num_passes = int(len(Vg_data) / datapoints_per_pass)
+    # Extract data from the final forward Vg sweep
+    start_index = (num_passes - 2) * datapoints_per_pass
+    stop_index = (num_passes - 1) * datapoints_per_pass
+    Vg = Vg_data[start_index: stop_index]
+    Isd = Isd_data[start_index: stop_index]
+    rho = Vsd / Isd
+    ax = ax1 if device == '1' else ax2
+    ax.plot(Vg, rho, color='C0' if conditions == 'Dark' else 'C3',
+            linestyle=':' if filename[-5] == '2' else '-',
+            label=f'{conditions} conditions' if filename[-5] != '2' else None)
+ax1.set_title("Device 1 - Functionalised with Quantum Dots")
+ax2.set_title("Device 2 - Functionalised with Perovskites")
+for ax in (ax1, ax2):
+    ax.legend()
+    ax.set_xlabel("Gate voltage, $V_g$ (V)")
+    ax.set_ylabel("Resistivity, $\\rho$ ($\\Omega$/□)")
+
+# Plots showing linear extraplotion from the point with maximum mobility,
+# and methods for determining mobilities.
+fig1, (ax1a, ax1b) = plt.subplots(1, 2, figsize=(14, 6))
+fig2, (ax2a, ax2b) = plt.subplots(1, 2, figsize=(14, 6))
+files = ("data/cvd_time_power_22032024/CVD1F-Isd-Vg-Dark-post-long.dat",
+         "data/cvd_time_power_22032024/CVD2F-Isd-Vg-Dark-post-long.dat")
+for filename in files:
+    device = filename[32]  # strings '1' or '2'
+    Vg_data, Isd_data = np.loadtxt(filename, usecols=(0, 3), unpack=True)
+    datapoints_per_pass = int((max(Vg_data) - min(Vg_data)) / dVg)
+    num_passes = int(len(Vg_data) / datapoints_per_pass)
+    # Extract data from the final forward Vg sweep
+    start_index = (num_passes - 2) * datapoints_per_pass
+    stop_index = (num_passes - 1) * datapoints_per_pass
+    Vg = Vg_data[start_index: stop_index]
+    Isd = Isd_data[start_index: stop_index]
+    sigma = Isd / Vsd
+    axes = (ax1a, ax1b) if device == '1' else (ax2a, ax2b)
+    axes[0].plot(Vg, sigma)
+    V_dirac = Vg[np.argmin(sigma)]
+    gradient = np.gradient(sigma, Vg)
+    gradient_pad = np.pad(gradient, (width-1)//2, mode='edge')
+    gradient_smooth = np.convolve(gradient_pad, top_hat(width), mode='valid')
+    axes[1].plot(Vg, gradient, 'k:', label='$d\\sigma/dV_g$')
+    axes[1].plot(Vg, gradient_smooth, label='$d\\sigma/dV_g$, smoothed')
+    gradient2 = np.gradient(np.abs(gradient_smooth), Vg)
+    max_grad_index_1 = np.nonzero((Vg < V_dirac) & (gradient2 > 0))[0][-1]
+    max_grad_index_2 = np.nonzero((Vg > V_dirac) & (gradient2 > 0))[0][-1]
+    near_gradients_1 = gradient[max_grad_index_1-5: max_grad_index_1+6]
+    near_gradients_2 = gradient[max_grad_index_2-5:
+                                min(max_grad_index_2+6, len(gradient))]
+    # Parameters for graphical plot of chosen point and their uncertainties
+    m1, a1, b1 = np.mean(near_gradients_1), Vg[max_grad_index_1], sigma[max_grad_index_1]
+    m2, a2, b2 = np.mean(near_gradients_2), Vg[max_grad_index_2], sigma[max_grad_index_2]
+    c1 = b1 - m1 * a1
+    c2 = b2 - m2 * a2
+    axes[0].plot([a1, a2], [b1, b2], 'X', color='C3',
+                 label='Max gradient points')
+    axes[1].plot([a1, a2], [m1, m2], 'X', color='C3',
+                 label='Max gradient points')
+    grad_line_p1 = a1 - 5
+    grad_line_p2 = min(a2 + 5, Vg[-1])
+    axes[0].plot([grad_line_p1, -c1/m1], [m1*grad_line_p1+c1, 0], 'k:')
+    axes[0].plot([grad_line_p2, -c2/m2], [m2*grad_line_p2+c2, 0], 'k:',
+                 label='Extrapolations')
+fig1.suptitle("Device 1 - Functionalised with Quantum Dots")
+fig2.suptitle("Device 2 - Functionalised with Perovskites")
+for ax in (ax1a, ax2a):
+    ax.legend()
+    ax.set_xlabel("Gate voltage, $V_g$ (V)")
+    ax.set_ylabel("Conductivity, $\\sigma$ ($\\Omega^{-1}$□)")
+    ax.ticklabel_format(scilimits=[-4, 6], useMathText=True)
+for ax in (ax1b, ax2b):
+    ax.legend()
+    ax.set_xlabel("Gate voltage, $V_g$ (V)")
+    ax.set_ylabel("Gradient of conductivity, $d\\sigma/dV_g$ ($\\Omega^{-1}$□V$^{-1}$)")
+    ax.ticklabel_format(useMathText=True)
+
+
+"""
+Objective 3:
+Create a graph displaying the results for the pristine graphene samples,
+and demonstrate that the linear region of the graph was not reached.
+Estimate the field effect mobility and Dirac voltage anyway.
+"""
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+files = ("data/cvd_prefunc_12032024/CVD1-Isd-Vg.dat",
+         "data/cvd_prefunc_12032024/CVD2-Isd-Vg.dat")
 print()
-print("Parameter value averages before the long experiments:")
-print("Max resistivity for Device 1 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} Ω/sq".format(np.nanmean(dark1_rhos[dark1_prelong]),
-                                      np.nanstd(dark1_rhos[dark1_prelong])))
-print("Max resistivity for Device 1 (light conditions): " +
-      "{0:.2e} ± {1:.2e} Ω/sq".format(np.nanmean(light1_rhos[light1_prelong]),
-                                      np.nanstd(light1_rhos[light1_prelong])))
-print("Max resistivity for Device 2 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} Ω/sq".format(np.nanmean(dark2_rhos[dark2_prelong]),
-                                      np.nanstd(dark2_rhos[dark2_prelong])))
-print("Max resistivity for Device 2 (light conditions): " +
-      "{0:.2e} ± {1:.2e} Ω/sq".format(np.nanmean(light2_rhos[light2_prelong]),
-                                      np.nanstd(light2_rhos[light2_prelong])))
-print("δn for Device 1 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} cm^-2".format(1e-4*np.nanmean(dark1_delta_ns[dark1_prelong]),
-                                       1e-4*np.nanstd(dark1_delta_ns[dark1_prelong])))
-print("δn for Device 1 (light conditions): " +
-      "{0:.2e} ± {1:.2e} cm^-2".format(1e-4*np.nanmean(light1_delta_ns[light1_prelong]),
-                                       1e-4*np.nanstd(light1_delta_ns[light1_prelong])))
-print("δn for Device 2 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} cm^-2".format(1e-4*np.nanmean(dark2_delta_ns[dark2_prelong]),
-                                       1e-4*np.nanstd(dark2_delta_ns[dark2_prelong])))
-print("δn for Device 2 (light conditions): " +
-      "{0:.2e} ± {1:.2e} cm^-2".format(1e-4*np.nanmean(light2_delta_ns[light2_prelong]),
-                                       1e-4*np.nanstd(light2_delta_ns[light2_prelong])))
-print("3-point mobility for Device 1 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} cm^2 V^-1 s^-1".format(1e4*np.nanmean(dark1_mu_3ps[dark1_prelong]),
-                                                1e4*np.nanstd(dark1_mu_3ps[dark1_prelong])))
-print("3-point mobility for Device 1 (light conditions): " +
-      "{0:.2e} ± {1:.2e} cm^2 V^-1 s^-1".format(1e4*np.nanmean(light1_mu_3ps[light1_prelong]),
-                                                1e4*np.nanstd(light1_mu_3ps[light1_prelong])))
-print("3-point mobility for Device 2 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} cm^2 V^-1 s^-1".format(1e4*np.nanmean(dark2_mu_3ps[dark2_prelong]),
-                                                1e4*np.nanstd(dark2_mu_3ps[dark2_prelong])))
-print("3-point mobility for Device 2 (light conditions): " +
-      "{0:.2e} ± {1:.2e} cm^2 V^-1 s^-1".format(1e4*np.nanmean(light2_mu_3ps[light2_prelong]),
-                                                1e4*np.nanstd(light2_mu_3ps[light2_prelong])))
-print("max-mobility/FWHM voltage difference for Device 1 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(dark1_V_diffs[dark1_prelong]),
-                                   np.nanstd(dark1_V_diffs[dark1_prelong])))
-print("max-mobility/FWHM voltage difference for Device 1 (light conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(light1_V_diffs[light1_prelong]),
-                                   np.nanstd(light1_V_diffs[light1_prelong])))
-print("max-mobility/FWHM voltage difference for Device 2 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(dark2_V_diffs[dark2_prelong]),
-                                   np.nanstd(dark2_V_diffs[dark2_prelong])))
-print("max-mobility/FWHM voltage difference for Device 2 (light conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(light2_V_diffs[light2_prelong]),
-                                   np.nanstd(light2_V_diffs[light2_prelong])))
+print("Estimates of μ_FE and V_Dirac for the pristine graphene samples:")
+for filename in files:
+    device = filename[29]  # strings '1' or '2'
+    Vg_data, Isd_data = np.loadtxt(filename, usecols=(0, 3), unpack=True)
+    datapoints_per_pass = int((max(Vg_data) - min(Vg_data)) / dVg)
+    num_passes = int(len(Vg_data) / datapoints_per_pass)
+    # Extract data from the final forward Vg sweep
+    start_index = (num_passes - 2) * datapoints_per_pass
+    stop_index = (num_passes - 1) * datapoints_per_pass
+    Vg = Vg_data[start_index: stop_index]
+    Isd = Isd_data[start_index: stop_index]
+    sigma = Isd / Vsd
+    ax1.plot(Vg, sigma, label=f'CVD{device}', color=f'C{int(device)-1}')
+    gradient = np.gradient(sigma, Vg)
+    ax2.plot(Vg, gradient, label=f'CVD{device}', color=f'C{int(device)-1}')
+    min_grad = min(gradient)
+    min_grad_index = np.argmin(gradient)
+    mu = d/(epsilon_0 * epsilon_r) * abs(min_grad)
+    V_dirac_extrap = Vg[min_grad_index] - sigma[min_grad_index] / min_grad
+    print(f"For CVD{device}, μ_FE >= {mu*1e4:.0f} cm^2 V^-1 s^-1, " +
+          f"and V_Dirac <= {V_dirac_extrap:.0f} V")
+    print("This V_Dirac corresponds to a carrier concentration of " +
+          f"{1e-4*V_dirac * (epsilon_0 * epsilon_r) / (e * d):.2e} cm^-2")
+    ax1.plot([Vg[min_grad_index], V_dirac_extrap],
+             [sigma[min_grad_index], 0], ':', color=f'C{int(device)-1}')
+for ax in (ax1, ax2):
+    ax.legend()
+    ax.set_xlabel("Gate voltage, $V_g$ (V)")
+    ax.ticklabel_format(scilimits=[-3, 6], useMathText=True)
+ax1.set_ylabel("Conductivity, $\\sigma$ ($\\Omega^{-1}$□)")
+ax2.set_ylabel("Gradient of conductivity, $d\\sigma/dV_g$ ($\\Omega^{-1}$□V$^{-1}$)")
+
+"""
+Objective 4:
+Create a graph displaying the results for the functionalised OFET samples.
+Estimate the field effect mobility and carrier concentration.
+"""
+
+# Physical dimensions of the OFET chip are different than the GFET
+d = 230e-9  # dielectric thickness (m)
+L = 10e-6  # Length of the channel (parallel to current flow) (m)
+dL = 0.5e-6  # Length uncertainty
+W = 9730e-6  # Width of the channel (perpendicular to current flow) (m)
+dW = 10e-6  # Width uncertainty
+Vsd = 5  # Source-drain voltage (V)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+files = ("data/ofet3_16022024/OFET3F-Isd-Vg-Dark.dat",
+         "data/ofet3_16022024/OFET3F-Isd-Vg-Light.dat",
+         "data/ofet4_23022024/OFET4F-Isd-Vg-Dark.dat",
+         "data/ofet4_23022024/OFET4F-Isd-Vg-Light.dat")
 print()
-print("Parameter value averages after the long experiments:")
-print("Max resistivity for Device 1 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} Ω/sq".format(np.nanmean(dark1_rhos[~dark1_prelong]),
-                                      np.nanstd(dark1_rhos[~dark1_prelong])))
-print("Max resistivity for Device 1 (light conditions): " +
-      "{0:.2e} ± {1:.2e} Ω/sq".format(np.nanmean(light1_rhos[~light1_prelong]),
-                                      np.nanstd(light1_rhos[~light1_prelong])))
-print("Max resistivity for Device 2 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} Ω/sq".format(np.nanmean(dark2_rhos[~dark2_prelong]),
-                                      np.nanstd(dark2_rhos[~dark2_prelong])))
-print("Max resistivity for Device 2 (light conditions): " +
-      "{0:.2e} ± {1:.2e} Ω/sq".format(np.nanmean(light2_rhos[~light2_prelong]),
-                                      np.nanstd(light2_rhos[~light2_prelong])))
-print("δn for Device 1 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} cm^-2".format(1e-4*np.nanmean(dark1_delta_ns[~dark1_prelong]),
-                                       1e-4*np.nanstd(dark1_delta_ns[~dark1_prelong])))
-print("δn for Device 1 (light conditions): " +
-      "{0:.2e} ± {1:.2e} cm^-2".format(1e-4*np.nanmean(light1_delta_ns[~light1_prelong]),
-                                       1e-4*np.nanstd(light1_delta_ns[~light1_prelong])))
-print("δn for Device 2 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} cm^-2".format(1e-4*np.nanmean(dark2_delta_ns[~dark2_prelong]),
-                                       1e-4*np.nanstd(dark2_delta_ns[~dark2_prelong])))
-print("δn for Device 2 (light conditions): " +
-      "{0:.2e} ± {1:.2e} cm^-2".format(1e-4*np.nanmean(light2_delta_ns[~light2_prelong]),
-                                       1e-4*np.nanstd(light2_delta_ns[~light2_prelong])))
-print("3-point mobility for Device 1 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} cm^2 V^-1 s^-1".format(1e4*np.nanmean(dark1_mu_3ps[~dark1_prelong]),
-                                                1e4*np.nanstd(dark1_mu_3ps[~dark1_prelong])))
-print("3-point mobility for Device 1 (light conditions): " +
-      "{0:.2e} ± {1:.2e} cm^2 V^-1 s^-1".format(1e4*np.nanmean(light1_mu_3ps[~light1_prelong]),
-                                                1e4*np.nanstd(light1_mu_3ps[~light1_prelong])))
-print("3-point mobility for Device 2 (dark conditions): " +
-      "{0:.2e} ± {1:.2e} cm^2 V^-1 s^-1".format(1e4*np.nanmean(dark2_mu_3ps[~dark2_prelong]),
-                                                1e4*np.nanstd(dark2_mu_3ps[~dark2_prelong])))
-print("3-point mobility for Device 2 (light conditions): " +
-      "{0:.2e} ± {1:.2e} cm^2 V^-1 s^-1".format(1e4*np.nanmean(light2_mu_3ps[~light2_prelong]),
-                                                1e4*np.nanstd(light2_mu_3ps[~light2_prelong])))
-print("max-mobility/FWHM voltage difference for Device 1 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(dark1_V_diffs[~dark1_prelong]),
-                                   np.nanstd(dark1_V_diffs[~dark1_prelong])))
-print("max-mobility/FWHM voltage difference for Device 1 (light conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(light1_V_diffs[~light1_prelong]),
-                                   np.nanstd(light1_V_diffs[~light1_prelong])))
-print("max-mobility/FWHM voltage difference for Device 2 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(dark2_V_diffs[~dark2_prelong]),
-                                   np.nanstd(dark2_V_diffs[~dark2_prelong])))
-print("max-mobility/FWHM voltage difference for Device 2 (light conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(light2_V_diffs[~light2_prelong]),
-                                   np.nanstd(light2_V_diffs[~light2_prelong])))
-
-# Overshoot in V_dirac estimate vs. actual V_dirac (when both are measured)
-dark1_dirac_V_extraps = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                                  else np.nan for row in dark1_data[:, 1, :]])
-light1_dirac_V_extraps = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                                   else np.nan for row in light1_data[:, 1, :]])
-dark2_dirac_V_extraps = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                                  else np.nan for row in dark2_data[:, 1, :]])
-light2_dirac_V_extraps = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                                   else np.nan for row in light2_data[:, 1, :]])
-dark1_dirac_V_overshoots = np.abs(dark1_dirac_V_extraps - dark1_dirac_Vs)
-light1_dirac_V_overshoots = np.abs(light1_dirac_V_extraps - light1_dirac_Vs)
-dark2_dirac_V_overshoots = np.abs(dark2_dirac_V_extraps - dark2_dirac_Vs)
-light2_dirac_V_overshoots = np.abs(light2_dirac_V_extraps - light2_dirac_Vs)
-print()
-print("Average voltage difference between the actual Dirac voltage, and \
-linear extrapolations from the point with maximum mobility:")
-print("For Device 1 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(dark1_dirac_V_overshoots),
-                                   np.nanstd(dark1_dirac_V_overshoots)))
-print("For Device 1 (light conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(light1_dirac_V_overshoots),
-                                   np.nanstd(light1_dirac_V_overshoots)))
-print("For Device 2 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(dark2_dirac_V_overshoots),
-                                   np.nanstd(dark2_dirac_V_overshoots)))
-print("For Device 2 (light conditions): " +
-      "{0:.1f} ± {1:.1f} V".format(np.nanmean(light2_dirac_V_overshoots),
-                                   np.nanstd(light2_dirac_V_overshoots)))
-
-# Comparing maximum (hole) mobility to the 3-point mobility
-# I've already redefined these, so I've got to set them back the right values
-dark1_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark1_data[:, 0, :]])
-light1_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light1_data[:, 0, :]])
-dark2_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark2_data[:, 0, :]])
-light2_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light2_data[:, 0, :]])
-dark1_mu_3p_diffs = np.abs(dark1_mu_3ps / dark1_mu_maxes - 1)
-light1_mu_3p_diffs = np.abs(light1_mu_3ps / light1_mu_maxes - 1)
-dark2_mu_3p_diffs = np.abs(dark2_mu_3ps / dark2_mu_maxes - 1)
-light2_mu_3p_diffs = np.abs(light2_mu_3ps / light2_mu_maxes - 1)
-print()
-print("Mean percentage difference between mu_3p and mu_max (p)")
-print("For Device 1 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} %".format(100*np.nanmean(dark1_mu_3p_diffs),
-                                   100*np.nanstd(dark1_mu_3p_diffs)))
-print("For Device 1 (light conditions): " +
-      "{0:.1f} ± {1:.1f} %".format(100*np.nanmean(light1_mu_3p_diffs),
-                                   100*np.nanstd(light1_mu_3p_diffs)))
-print("For Device 2 (dark conditions): " +
-      "{0:.2f} ± {1:.2f} %".format(100*np.nanmean(dark2_mu_3p_diffs),
-                                   100*np.nanstd(dark2_mu_3p_diffs)))
-print("For Device 2 (light conditions): " +
-      "{0:.2f} ± {1:.2f} %".format(100*np.nanmean(light2_mu_3p_diffs),
-                                   100*np.nanstd(light2_mu_3p_diffs)))
-
-# Comparing (numerically) the agreement between mu_max and mu_FWHM
-# First for hole mobility
-# I've already redefined these, so I've got to set them back the right values
-dark1_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark1_data[:, 6, :]])
-light1_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light1_data[:, 6, :]])
-dark1_mu_FWHM_diffs = np.abs(dark1_mu_FWHMs / dark1_mu_maxes - 1)
-light1_mu_FWHM_diffs = np.abs(light1_mu_FWHMs / light1_mu_maxes - 1)
-dark2_mu_FWHM_diffs = np.abs(dark2_mu_FWHMs / dark2_mu_maxes - 1)
-light2_mu_FWHM_diffs = np.abs(light2_mu_FWHMs / light2_mu_maxes - 1)
-print()
-print("Mean percentage difference between mu_FWHM and mu_max (p)")
-print("For Device 1 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} %".format(100*np.nanmean(dark1_mu_FWHM_diffs),
-                                   100*np.nanstd(dark1_mu_FWHM_diffs)))
-print("For Device 1 (light conditions): " +
-      "{0:.1f} ± {1:.1f} %".format(100*np.nanmean(light1_mu_FWHM_diffs),
-                                   100*np.nanstd(light1_mu_FWHM_diffs)))
-print("For Device 2 (dark conditions): " +
-      "{0:.2f} ± {1:.2f} %".format(100*np.nanmean(dark2_mu_FWHM_diffs),
-                                   100*np.nanstd(dark2_mu_FWHM_diffs)))
-print("For Device 2 (light conditions): " +
-      "{0:.2f} ± {1:.2f} %".format(100*np.nanmean(light2_mu_FWHM_diffs),
-                                   100*np.nanstd(light2_mu_FWHM_diffs)))
-# Second for electron mobility (device 1 only)
-dark1_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark1_data[:, 8, :]])
-light1_mu_maxes = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light1_data[:, 8, :]])
-dark1_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                          else np.nan for row in dark1_data[:, 9, :]])
-light1_mu_FWHMs = np.array([row[~np.isnan(row)][-1] if any(~np.isnan(row))
-                           else np.nan for row in light1_data[:, 9, :]])
-dark1_mu_FWHM_diffs = np.abs(dark1_mu_FWHMs / dark1_mu_maxes - 1)
-light1_mu_FWHM_diffs = np.abs(light1_mu_FWHMs / light1_mu_maxes - 1)
-print()
-print("Mean percentage difference between mu_FWHM and mu_max (n)")
-print("For Device 1 (dark conditions): " +
-      "{0:.1f} ± {1:.1f} %".format(100*np.nanmean(dark1_mu_FWHM_diffs),
-                                   100*np.nanstd(dark1_mu_FWHM_diffs)))
-print("For Device 1 (light conditions): " +
-      "{0:.1f} ± {1:.1f} %".format(100*np.nanmean(light1_mu_FWHM_diffs),
-                                   100*np.nanstd(light1_mu_FWHM_diffs)))
-
-###############################################################################
-# Crap below vvvvvvvvvvvv
-
-# # Graph how the Dirac has changed over time
-# fig1, (ax1a, ax1b) = plt.subplots(1, 2, figsize=(14, 6))
-# fig2, (ax2a, ax2b) = plt.subplots(1, 2, figsize=(14, 6))
-# for n, (label, data) in enumerate(zip(dark1_names, dark1_data)):
-#     estimates, estimate_errs = data[2, :], data[3, :]
-#     known_vals = data[4, :]
-#     ax1a.plot(range(1, len(estimates)+1), estimates, '--o', label=label, color=f'C{n}')
-#     ax1a.plot(range(1, len(known_vals)+1), known_vals, '-o', color=f'C{n}')
-# for n, (label, data) in enumerate(zip(light1_names, light1_data)):
-#     estimates, estimate_errs = data[2, :], data[3, :]
-#     known_vals = data[4, :]
-#     ax1b.plot(range(1, len(estimates)+1), estimates, '--o', label=label, color=f'C{n}')
-#     ax1b.plot(range(1, len(known_vals)+1), known_vals, '-o', color=f'C{n}')
-# for n, (label, data) in enumerate(zip(dark2_names, dark2_data)):
-#     estimates, estimate_errs = data[2, :], data[3, :]
-#     known_vals = data[4, :]
-#     ax2a.plot(range(1, len(estimates)+1), estimates, '--o', label=label, color=f'C{n}')
-#     ax2a.plot(range(1, len(known_vals)+1), known_vals, '-o', color=f'C{n}')
-# for n, (label, data) in enumerate(zip(light2_names, light2_data)):
-#     estimates, estimate_errs = data[2, :], data[3, :]
-#     known_vals = data[4, :]
-#     ax2b.plot(range(1, len(estimates)+1), estimates, '--o', label=label, color=f'C{n}')
-#     ax2b.plot(range(1, len(known_vals)+1), known_vals, '-o', color=f'C{n}')
-# fig1.suptitle("Device 1 (Quantum dots)")
-# fig2.suptitle("Device 2 (Perovskites)")
-# ax1a.set_title("Dark conditions")
-# ax1b.set_title("Light conditions")
-# ax2a.set_title("Dark conditions")
-# ax2b.set_title("Light conditions")
-# for ax in (ax1a, ax1b, ax2a, ax2b):
-#     ax.set_xticks(range(1, 5))
-#     ax.set_xlabel("Gate voltage sweep no.")
-#     ax.set_ylabel("Dirac voltage, $V_{Dirac}$ (V)")
-#     ax.legend(loc='lower right')
-
-# # Graph how the hole mobility has changed over time
-# fig1, (ax1a, ax1b) = plt.subplots(1, 2, figsize=(14, 6))
-# fig2, (ax2a, ax2b) = plt.subplots(1, 2, figsize=(14, 6))
-# for n, (label, data) in enumerate(zip(dark1_names, dark1_data)):
-#     mu_maxes, mu_max_errs = data[0, :], data[1, :]
-#     mu_FWHMs, mu_FWHM_errs = data[6, :], data[7, :]
-#     ax1a.errorbar(range(1, len(mu_maxes)+1), mu_maxes*1e4, yerr=mu_max_errs*1e4, fmt='--o', label=label, color=f'C{n}')
-#     ax1a.errorbar(range(1, len(mu_FWHMs)+1), mu_FWHMs*1e4, yerr=mu_FWHM_errs*1e4, fmt='-o', color=f'C{n}')
-# for n, (label, data) in enumerate(zip(light1_names, light1_data)):
-#     mu_maxes, mu_max_errs = data[0, :], data[1, :]
-#     mu_FWHMs, mu_FWHM_errs = data[6, :], data[7, :]
-#     ax1b.errorbar(range(1, len(mu_maxes)+1), mu_maxes*1e4, yerr=mu_max_errs*1e4, fmt='--o', label=label, color=f'C{n}')
-#     ax1b.errorbar(range(1, len(mu_FWHMs)+1), mu_FWHMs*1e4, yerr=mu_FWHM_errs*1e4, fmt='-o', color=f'C{n}')
-# for n, (label, data) in enumerate(zip(dark2_names, dark2_data)):
-#     mu_maxes, mu_max_errs = data[0, :], data[1, :]
-#     mu_FWHMs, mu_FWHM_errs = data[6, :], data[7, :]
-#     ax2a.errorbar(range(1, len(mu_maxes)+1), mu_maxes*1e4, yerr=mu_max_errs*1e4, fmt='--o', label=label, color=f'C{n}')
-#     ax2a.errorbar(range(1, len(mu_FWHMs)+1), mu_FWHMs*1e4, yerr=mu_FWHM_errs*1e4, fmt='-o', color=f'C{n}')
-# for n, (label, data) in enumerate(zip(light2_names, light2_data)):
-#     mu_maxes, mu_max_errs = data[0, :], data[1, :]
-#     mu_FWHMs, mu_FWHM_errs = data[6, :], data[7, :]
-#     ax2b.errorbar(range(1, len(mu_maxes)+1), mu_maxes*1e4, yerr=mu_max_errs*1e4, fmt='--o', label=label, color=f'C{n}')
-#     ax2b.errorbar(range(1, len(mu_FWHMs)+1), mu_FWHMs*1e4, yerr=mu_FWHM_errs*1e4, fmt='-o', color=f'C{n}')
-# fig1.suptitle("Device 1 (Quantum dots)")
-# fig2.suptitle("Device 2 (Perovskites)")
-# ax1a.set_title("Dark conditions")
-# ax1b.set_title("Light conditions")
-# ax2a.set_title("Dark conditions")
-# ax2b.set_title("Light conditions")
-# for ax in (ax1a, ax1b, ax2a, ax2b):
-#     ax.set_xticks(range(1, 5))
-#     ax.set_xlabel("Gate voltage sweep no.")
-#     ax.set_ylabel("Hole mobility, $\\mu_p$ (cm$^2$ V${^-1}$ s$^{-1}$)")
-#     ax.legend(loc='lower right')
-
-# # Graph how the electron mobility has changed over time
-# fig1, (ax1a, ax1b) = plt.subplots(1, 2, figsize=(14, 6))
-# for n, (label, data) in enumerate(zip(dark1_names, dark1_data)):
-#     mu_maxes, mu_max_errs = data[8, :], data[9, :]
-#     if all(np.isnan(mu_maxes)):
-#         continue
-#     ax1a.plot(range(1, len(mu_maxes)+1), mu_maxes*1e4, '--o', label=label, color=f'C{n}')
-#     mu_FWHMs, mu_FWHM_errs = data[10, :], data[11, :]
-#     if all(np.isnan(mu_FWHMs)):
-#         continue
-#     ax1a.plot(range(1, len(mu_FWHMs)+1), mu_FWHMs*1e4, '-o', color=f'C{n}')
-# for n, (label, data) in enumerate(zip(light1_names, light1_data)):
-#     mu_maxes, mu_max_errs = data[8, :], data[9, :]
-#     if all(np.isnan(mu_maxes)):
-#         continue
-#     ax1b.plot(range(1, len(mu_maxes)+1), mu_maxes*1e4, '--o', label=label, color=f'C{n}')
-#     mu_FWHMs, mu_FWHM_errs = data[10, :], data[11, :]
-#     if all(np.isnan(mu_FWHMs)):
-#         continue
-#     ax1b.plot(range(1, len(mu_FWHMs)+1), mu_FWHMs*1e4, '-o', color=f'C{n}')
-# fig1.suptitle("Device 1 (Quantum dots)")
-# ax1a.set_title("Dark conditions")
-# ax1b.set_title("Light conditions")
-# for ax in (ax1a, ax1b):
-#     ax.set_xticks(range(1, 5))
-#     ax.set_xlabel("Gate voltage sweep no.")
-#     ax.set_ylabel("Electron mobility, $\\mu_n$ (cm$^2$ V${^-1}$ s$^{-1}$)")
-#     ax.legend(loc='lower right')
-
-# # Graph how the maximum resistivity has changed over time
-# fig1, (ax1a, ax1b) = plt.subplots(1, 2, figsize=(14, 6))
-# fig2, (ax2a, ax2b) = plt.subplots(1, 2, figsize=(14, 6))
-# for n, (label, rho) in enumerate(zip(dark1_names, dark1_data[:, 5, :])):
-#     if all(np.isnan(rho)):
-#         continue
-#     ax1a.plot(range(1, len(rho)+1), rho, '--o', label=label, color=f'C{n}')
-# for n, (label, rho) in enumerate(zip(light1_names, light1_data[:, 5, :])):
-#     if all(np.isnan(rho)):
-#         continue
-#     ax1b.plot(range(1, len(rho)+1), rho, '--o', label=label, color=f'C{n}')
-# for n, (label, rho) in enumerate(zip(dark2_names, dark2_data[:, 5, :])):
-#     if all(np.isnan(rho)):
-#         continue
-#     ax2a.plot(range(1, len(rho)+1), rho, '--o', label=label, color=f'C{n}')
-# for n, (label, rho) in enumerate(zip(light2_names, light2_data[:, 5, :])):
-#     if all(np.isnan(rho)):
-#         continue
-#     ax2b.plot(range(1, len(rho)+1), rho, '--o', label=label, color=f'C{n}')
-# fig1.suptitle("Device 1 (Quantum dots)")
-# fig2.suptitle("Device 2 (Perovskites)")
-# ax1a.set_title("Dark conditions")
-# ax1b.set_title("Light conditions")
-# ax2a.set_title("Dark conditions")
-# ax2b.set_title("Light conditions")
-# for ax in (ax1a, ax1b, ax2a, ax2b):
-#     ax.set_xticks(range(1, 5))
-#     ax.set_xlabel("Gate voltage sweep no.")
-#     ax.set_ylabel("Maximum resistivity, $\\rho_{max}$ ($\\Omega/sq$)")
-#     ax.legend(loc='lower right')
-
-# # Graph how δn and the 3-point mobility change over time (Device 1 only).
-# fig1, (ax1a, ax1b) = plt.subplots(1, 2, figsize=(14, 6))
-# for n, (label, delta_n) in enumerate(zip(dark1_names, dark1_data[:, 12, :])):
-#     if all(np.isnan(delta_n)):
-#         continue
-#     ax1a.plot(range(1, len(delta_n)+1), delta_n*1e-4, '--o', label=label, color=f'C{n}')
-# for n, (label, delta_n) in enumerate(zip(light1_names, light1_data[:, 12, :])):
-#     if all(np.isnan(delta_n)):
-#         continue
-#     ax1b.plot(range(1, len(delta_n)+1), delta_n*1e-4, '--o', label=label, color=f'C{n}')
-# ax1a.set_title("Dark conditions")
-# ax1b.set_title("Light conditions")
-# for ax in (ax1a, ax1b):
-#     ax.set_xticks(range(1, 5))
-#     ax.set_xlabel("Gate voltage sweep no.")
-#     ax.set_ylabel("$\\delta n$ (cm$^{-2}$)")
-#     ax.legend(loc='lower right')
-# fig1, (ax1a, ax1b) = plt.subplots(1, 2, figsize=(14, 6))
-# for n, (label, mu_3p) in enumerate(zip(dark1_names, dark1_data[:, 13, :])):
-#     if all(np.isnan(mu_3p)):
-#         continue
-#     ax1a.plot(range(1, len(mu_3p)+1), mu_3p*1e4, '--o', label=label, color=f'C{n}')
-# for n, (label, mu_3p) in enumerate(zip(light1_names, light1_data[:, 13, :])):
-#     if all(np.isnan(mu_3p)):
-#         continue
-#     ax1b.plot(range(1, len(mu_3p)+1), mu_3p*1e4, '--o', label=label, color=f'C{n}')
-# ax1a.set_title("Dark conditions")
-# ax1b.set_title("Light conditions")
-# for ax in (ax1a, ax1b):
-#     ax.set_xticks(range(1, 5))
-#     ax.set_xlabel("Gate voltage sweep no.")
-#     ax.set_ylabel("3-point mobility, $\\mu_{3p}$ (cm$^2$ V${^-1}$ s$^{-1}$)")
-#     ax.legend(loc='lower right')
+print("Estimates of μ_FE and V_Dirac for the functionalised OFET samples:")
+for filename in files:
+    conditions = filename[34:-4]  # string 'Dark' or 'Light'
+    device = filename[24]  # string '3' or '4'
+    ax = ax2 if device == '3' else ax1
+    Vg, Isd = np.loadtxt(filename, usecols=(0, 3), unpack=True)
+    sigma = L / W * Isd / Vsd
+    ax.plot(Vg, sigma, label=f'{conditions} conditions')
+    fitting_Vg = Vg[len(Vg)//4: len(Vg)//2]
+    fitting_sigma = sigma[len(sigma)//4: len(sigma)//2]
+    (m, c), cv = curve_fit(linear_fit, fitting_Vg, fitting_sigma)
+    mu = d/(epsilon_0 * epsilon_r) * abs(m)
+    mu_err = mu * np.sqrt((dL/L)**2 + (dW/W)**2 + (cv[0, 0]/m)**2)
+    p0 = -c/m * (epsilon_0 * epsilon_r) / (e * d)
+    p0_err = p0 * np.sqrt((dL/L)**2 + (dW/W)**2 + (cv[0, 0]/m)**2 + (cv[1, 1]/c)**2)
+    print(f"For OFET{device} in {conditions.lower()} conditions, " +
+          f"μ_FE = {mu*1e4:.2e} ± {mu_err*1e4:.2e} cm^2 V^-1 s^-1, " +
+          f"and p_0 = {p0*1e-4:.2e} ± {p0_err*1e-4:.2e} cm^-2")
+for ax in (ax1, ax2):
+    ax.legend()
+    ax.set_xlabel("Gate voltage, $V_g$ (V)")
+    ax.set_ylabel("Conductivity, $\\sigma$ ($\\Omega^{-1}$□)")
+    ax.ticklabel_format(useMathText=True)
+ax1.set_title("OFET functionalised with Quantum Dots")
+ax2.set_title("OFET functionalised with Perovskites")
 
 plt.show()
