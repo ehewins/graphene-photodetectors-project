@@ -221,20 +221,21 @@ file_table = (
 )
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-fig.suptitle("With constant $V_{sd} = 10$ mV and $V_g = 0$ V")
-ax1.set_title("Device 1 - Quantum Dots")
-ax2.set_title("Device 2 - Perovskites")
+# fig.suptitle("With constant $V_{sd} = 10$ mV and $V_g = 0$ V")
+ax1.set_title("Device 1 - Functionalised with Quantum Dots")
+ax2.set_title("Device 2 - Functionalised with Perovskites")
 for data in file_table[0::2]:
     time, current = np.loadtxt(data[0], usecols=(1, 3), unpack=True)
-    ax1.plot(time, current, label=data[1])
+    ax1.plot(time, 1e6*current, label=data[1])
 for data in file_table[1::2]:
     time, current = np.loadtxt(data[0], usecols=(1, 3), unpack=True)
-    ax2.plot(time, current, label=data[1])
+    ax2.plot(time, 1e6*current, label=data[1])
 for ax in (ax1, ax2):
     ax.set_xlabel("Time, $t$, (s)")
-    ax.set_ylabel("Source-drain current, $I_{sd}$, (A)")
+    ax.set_ylabel("Source-drain current, $I_{sd}$, ($\\mu$A)")
 ax1.legend()
 ax2.legend()
+fig.tight_layout()
 
 # It looks like we've lost the slow times and their exponential curve shapes,
 # so we'll just do a manual photocurrent calculation for measurement set 2.
@@ -265,28 +266,28 @@ photocurrent measurements with attenuating filters between the laser and sample
 
 # table of file names, graph labels and the filter's actual optical density
 file_table = (
-    ("CVD1F-time-50mV.dat", "OD0", 0),
-    ("CVD1F-time-50mV-OD1.dat", "OD1", 1.1),
-    ("CVD1F-time-50mV-OD2.dat", "OD2", 2.7),
-    ("CVD1F-time-50mV-OD3.dat", "OD3", 3.6),
-    ("CVD2F-time-50mV.dat", "OD0", 0),
-    ("CVD2F-time-50mV-OD1.dat", "OD1", 1.1),
-    ("CVD2F-time-50mV-OD2.dat", "OD2", 2.7),
-    ("CVD2F-time-50mV-OD3.dat", "OD3", 3.6),
+    ("CVD1F-time-50mV.dat", "Filter OD0", 0),
+    ("CVD1F-time-50mV-OD1.dat", "Filter OD1", 1.1),
+    ("CVD1F-time-50mV-OD2.dat", "Filter OD2", 2.7),
+    ("CVD1F-time-50mV-OD3.dat", "Filter OD3", 3.6),
+    ("CVD2F-time-50mV.dat", "Filter OD0", 0),
+    ("CVD2F-time-50mV-OD1.dat", "Filter OD1", 1.1),
+    ("CVD2F-time-50mV-OD2.dat", "Filter OD2", 2.7),
+    ("CVD2F-time-50mV-OD3.dat", "Filter OD3", 3.6),
 )
 
 # Figure setup
 fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(14, 6))
-fig1.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
-fig2.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
+# fig1.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
+# fig2.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
 for ax in (ax1, ax3):
-    ax.set_title("Device 1 - Quantum Dots")
+    ax.set_title("Device 1 - Functionalised with Quantum Dots")
 for ax in (ax2, ax4):
-    ax.set_title("Device 2 - Perovskites")
+    ax.set_title("Device 2 - Functionalised with Perovskites")
 for ax in (ax1, ax2):
     ax.set_xlabel("Time, $t$, (s)")
-    ax.set_ylabel("Source-drain current, $I_{sd}$, (A)")
+    ax.set_ylabel("Source-drain current, $I_{sd}$, ($\\mu$A)")
 for ax in (ax3, ax4):
     ax.set_xlabel("Power on device, $P$ (W)")
     ax.set_ylabel("Photoresponsivity, $R$ (A/W)")
@@ -299,10 +300,10 @@ responsivity = []
 power = []
 for data in file_table[:4]:
     time, current = np.loadtxt(data[0], usecols=(1, 3), unpack=True)
-    ax1.plot(time, current, label=data[1])
+    ax1.plot(time, 1e6*current, label=data[1])
     jump_ind1, jump_ind2 = find_jump_indices(current)
-    # ax1.plot(time[jump_ind1], current[jump_ind1], 'kx')  # visual check
-    # ax1.plot(time[jump_ind2], current[jump_ind2], 'kx')
+    # ax1.plot(time[jump_ind1], 1e6*current[jump_ind1], 'kx')  # visual check
+    # ax1.plot(time[jump_ind2], 1e6*current[jump_ind2], 'kx')
     photocurrent_values = np.abs(current[jump_ind2] - current[jump_ind1])
     Iph = np.mean(photocurrent_values)
     dIph = np.std(photocurrent_values)
@@ -320,16 +321,17 @@ print(f"Gradient of log(R_ph) vs log(P) plot: {m:e} ± {np.sqrt(cv[0, 0]):e}")
 ax3.loglog(power, responsivity, 'bo', label='Data')
 ax3.loglog(power, 10**c * np.array(power)**m, 'k-', label='Linear fit')
 ax3.legend()
+fig1.tight_layout()
 
 print("For Device 2, functionalised with perovskites:")
 responsivity = []
 power = []
 for data in file_table[4:]:
     time, current = np.loadtxt(data[0], usecols=(1, 3), unpack=True)
-    ax2.plot(time, current, label=data[1])
+    ax2.plot(time, 1e6*current, label=data[1])
     jump_ind1, jump_ind2 = find_jump_indices(current)
-    # ax2.plot(time[jump_ind1], current[jump_ind1], 'kx')  # visual check
-    # ax2.plot(time[jump_ind2], current[jump_ind2], 'kx')
+    # ax2.plot(time[jump_ind1], 1e6*current[jump_ind1], 'kx')  # visual check
+    # ax2.plot(time[jump_ind2], 1e6*current[jump_ind2], 'kx')
     photocurrent_values = np.abs(current[jump_ind2] - current[jump_ind1])
     Iph = np.mean(photocurrent_values)
     dIph = np.std(photocurrent_values)
@@ -347,5 +349,6 @@ print(f"Gradient of log(R_ph) vs log(P) plot: {m:e} ± {np.sqrt(cv[0, 0]):e}")
 ax4.loglog(power, responsivity, 'bo', label='Data')
 ax4.loglog(power, 10**c * np.array(power)**m, 'k-', label='Linear fit')
 ax4.legend()
+fig2.tight_layout()
 
 plt.show()

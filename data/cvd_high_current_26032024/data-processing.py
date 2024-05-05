@@ -21,11 +21,16 @@ def find_jump_indices(array):
     jumps = np.abs(arr_diffs) > biggest_jump * 0.5
     jump_i = np.argwhere(jumps).flatten()
     jump_f = jump_i + 1
-    # Some downward jumps take 2 datapoints - catch the actual finish point
-    for j in range(len(jump_f)):
-        if abs(array[jump_f[j]+1] - array[jump_i[j]]) > \
-           abs(array[jump_f[j]] - array[jump_i[j]]):
-            jump_f[j] += 1
+    # Some jumps take 2 datapoints - catch the actual finish point
+    for j in range(len(jump_i)):
+        if array[jump_i[j]] > array[jump_f[j]]:  # If a downward jump
+            if abs(array[jump_f[j]+1] - array[jump_i[j]]) > \
+               abs(array[jump_f[j]] - array[jump_i[j]]):
+                jump_f[j] += 1
+        else:  # If an upward jump
+            if abs(array[jump_f[j]] - array[jump_i[j]-1]) > \
+               abs(array[jump_f[j]] - array[jump_i[j]]):
+                jump_i[j] -= 1
     return jump_i, jump_f
 
 
@@ -35,17 +40,21 @@ on the measured photocurrent. Also graph photocurrent as a function of
 source-drain voltage.
 """
 
+P0 = 2.33e-6  # Power incident on device, without optical filters
+dP0 = 0.07e-6  # The corresponding uncertainty
+
 fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(14, 6))
 axes = np.array([[ax1, ax2], [ax3, ax4]])
 device_numbers = np.array([1, 2])
-channel_voltages = np.array([10, 50, 100, 200, 300])
+# channel_voltages = np.array([10, 50, 100, 200, 300])
+channel_voltages = np.array([100, 200, 300])
 for ax in axes[:, 0]:
-    ax.set_title("Device 1 - Quantum Dots")
+    ax.set_title("Device 1 - Functionalised with Quantum Dots")
 for ax in axes[:, 1]:
-    ax.set_title("Device 2 - Perovskite Nanocrystals")
+    ax.set_title("Device 2 - Functionalised with Perovskite Nanocrystals")
 for ax_1, ax_2, number, in zip(axes[0], axes[1], device_numbers):
-    Iph, dIph = [], []
+    Iph, dIph = np.array([]), np.array([])
     for Vsd in channel_voltages:
         filename = f"CVD{number}F-time-{Vsd}mV.dat"
         if Vsd in (10, 50):
@@ -54,28 +63,33 @@ for ax_1, ax_2, number, in zip(axes[0], axes[1], device_numbers):
         if Vsd not in (10, 50):  # Don't plot the old data.
             ax_1.plot(time, current, label='$V_{sd}$ = '+f'{Vsd} mV')
         index_1, index_2 = find_jump_indices(current)
-        # ax.plot(time[index_1], current[index_1], 'kx')  # visual check
-        # ax.plot(time[index_2], current[index_2], 'kx')
+        # ax_1.plot(time[index_1], current[index_1], 'kx')  # visual check
+        # ax_1.plot(time[index_2], current[index_2], 'kx')
         # NOTE: Checks show jumps aren't quite being identified correctly.
         #       I think it's close enough though.
         photocurrents = np.abs(current[index_2] - current[index_1])
-        Iph.append(np.mean(photocurrents))
-        dIph.append(np.std(photocurrents))
-    ax_2.plot(channel_voltages, Iph, 'bo', label='Datapoints')
-    (m, c), cv = curve_fit(linear_fit, channel_voltages, Iph)
+        Iph = np.append(Iph, np.mean(photocurrents))
+        dIph = np.append(dIph, np.std(photocurrents))
+    Rph = Iph / P0
+    dRph = Rph * np.sqrt((dIph/Iph)**2 + (dP0/P0)**2)
+    ax_2.errorbar(channel_voltages, Rph, yerr=dRph, fmt='o', color='C0',
+                  ecolor='C3', capsize=3, label='Datapoints')
+    (m, c), cv = curve_fit(linear_fit, channel_voltages, Rph)
     dm = np.sqrt(cv[0, 0])  # uncertainty in gradient
     ax_2.plot(channel_voltages, m*channel_voltages+c, 'k-', label='Linear fit')
-    m, dm = m * 1e3, dm * 1e3  # Convert from A/mV -> A/V for printing
-    print(f"Gradient of I_ph(V_g) for Device {number}: {m:e} ± {dm:e} A/V.")
-    print(f"At 300 mV, I_ph for Device {number} is {Iph[4]:e} ± {dIph[4]:e} A")
+    m, dm = m * 1e3, dm * 1e3  # Convert from A/W/mV -> A/W/V for printing
+    print(f"Gradient of R_ph(V_sd) for Device {number}: {m:e} ± {dm:e} A W^-1 V^-1.")
+    print(f"At 300 mV, R_ph for Device {number} is {Rph[-1]:e} ± {dRph[-1]:e} A W^-1")
 for ax in axes[0]:
     ax.set_xlabel("Time, $t$ (s)")
     ax.set_ylabel("Source-drain current, $I_{sd}$ (A)")
     ax.legend(loc=(0.67, 0.55))
 for ax in axes[1]:
     ax.set_xlabel("Source-drain voltage, $V_{sd}$ (mV)")
-    ax.set_ylabel("Photocurrent, $I_{ph}$ (A)")
+    ax.set_ylabel("Photoresponsivity, $R_{ph}$ (A/W)")
     ax.legend()
+fig1.tight_layout()
+fig2.tight_layout()
 
 """
 Objective 2: Graph the final Isd(Vg) measurements, identifying the Dirac
