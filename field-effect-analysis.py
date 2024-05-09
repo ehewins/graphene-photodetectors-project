@@ -598,16 +598,20 @@ for ax in (ax1b, ax2b):
 Objective 3:
 Create a graph displaying the results for the pristine graphene samples,
 and demonstrate that the linear region of the graph was not reached.
-Estimate the field effect mobility and Dirac voltage anyway.
+Also display results for the samples immediately after functionalisation.
+Estimate the field effect mobility and Dirac voltage for each data set.
 """
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 files = ("data/cvd_prefunc_12032024/CVD1-Isd-Vg.dat",
-         "data/cvd_prefunc_12032024/CVD2-Isd-Vg.dat")
+         "data/cvd_prefunc_12032024/CVD2-Isd-Vg.dat",
+         "data/cvd_func_15032024/CVD1F-Isd-Vg-Dark.dat",
+         "data/cvd_func_15032024/CVD2F-Isd-Vg-Dark.dat")
+labels = ("Pristine CVD1", "Pristine CVD2", "CVD1 w/ QDs", "CVD2 w/ NCs")
+colours = ("C0", "C3", "C9", "C6")
 print()
-print("Estimates of μ_FE and V_Dirac for the pristine graphene samples:")
-for filename in files:
-    device = filename[29]  # strings '1' or '2'
+print("Early measurment estimates of μ_FE and V_Dirac for the graphene samples:")
+for filename, label, colour, in zip(files, labels, colours):
     Vg_data, Isd_data = np.loadtxt(filename, usecols=(0, 3), unpack=True)
     datapoints_per_pass = int((max(Vg_data) - min(Vg_data)) / dVg)
     num_passes = int(len(Vg_data) / datapoints_per_pass)
@@ -617,25 +621,26 @@ for filename in files:
     Vg = Vg_data[start_index: stop_index]
     Isd = Isd_data[start_index: stop_index]
     sigma = Isd / Vsd
-    ax1.plot(Vg, sigma, label=f'CVD{device}', color=f'C{int(device)-1}')
+    ax1.plot(Vg, sigma, label=label, color=colour)
     gradient = np.gradient(sigma, Vg)
-    ax2.plot(Vg, gradient, label=f'CVD{device}', color=f'C{int(device)-1}')
+    ax2.plot(Vg, gradient, label=label, color=colour)
     min_grad = min(gradient)
     min_grad_index = np.argmin(gradient)
     mu = d/(epsilon_0 * epsilon_r) * abs(min_grad)
     V_dirac_extrap = Vg[min_grad_index] - sigma[min_grad_index] / min_grad
-    print(f"For CVD{device}, μ_FE >= {mu*1e4:.0f} cm^2 V^-1 s^-1, " +
+    print(f"For {label}, μ_FE >= {mu*1e4:.0f} cm^2 V^-1 s^-1, " +
           f"and V_Dirac <= {V_dirac_extrap:.0f} V")
     print("This V_Dirac corresponds to a carrier concentration of " +
-          f"{1e-4*V_dirac * (epsilon_0 * epsilon_r) / (e * d):.2e} cm^-2")
+          f"{1e-4*V_dirac_extrap * (epsilon_0 * epsilon_r) / (e * d):.2e} cm^-2")
     ax1.plot([Vg[min_grad_index], V_dirac_extrap],
-             [sigma[min_grad_index], 0], ':', color=f'C{int(device)-1}')
+             [sigma[min_grad_index], 0], ':', color=colour)
 for ax in (ax1, ax2):
     ax.legend()
     ax.set_xlabel("Gate voltage, $V_g$ (V)")
     ax.ticklabel_format(scilimits=[-3, 6], useMathText=True)
 ax1.set_ylabel("Conductivity, $\\sigma$ ($\\Omega^{-1}$□)")
 ax2.set_ylabel("Gradient of conductivity, $d\\sigma/dV_g$ ($\\Omega^{-1}$□V$^{-1}$)")
+fig.tight_layout()
 
 """
 Objective 4:
