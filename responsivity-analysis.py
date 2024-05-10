@@ -34,7 +34,7 @@ cvd1_responsivity_2_err = np.array([1.877089e+01, 1.891703e+00,
                                     1.304318e-01, 1.350277e-02])
 cvd2_responsivity_2 = np.array([106.21369220797607, 25.425037559747942,
                                 1.6721825367773298, 0.165424892703863])
-cvd2_responsivity_2_err = np.array(21.217404e+01, 1.052386e+00,
+cvd2_responsivity_2_err = np.array([1.217404e+01, 1.052386e+00,
                                    7.879564e-02, 1.295672e-02])
 (cvd1_m1, cvd1_c1), cvd1_cv1 = curve_fit(linear_fit, np.log10(power_1),
                                          np.log10(cvd1_responsivity_1))
