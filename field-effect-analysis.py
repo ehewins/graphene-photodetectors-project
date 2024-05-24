@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+plt.rcParams.update({'font.size': 14})
+
+
 def linear_fit(x, m, c):
     return m * x + c
 
@@ -18,32 +21,32 @@ measurements, this must be estimated from the gradient), and mobility (").
 """
 
 file_info = (
-    ("data/cvd_func_15032024/CVD1F-Isd-Vg-Dark.dat", "15/03", 1),
-    ("data/cvd_func_15032024/CVD1F-Isd-Vg-Light.dat", "15/03", 1),
-    ("data/cvd_func_15032024/CVD2F-Isd-Vg-Dark.dat", "15/03", 1),
-    # ("data/cvd_func_15032024/CVD2F-Isd-Vg-Light.dat", "15/03", 0),  # no linear region
-    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Dark.dat", "19/03 (1)", 2),
-    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Light.dat", "19/03 (1)", 2),
-    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Dark-25max.dat", "19/03 (2)", 3),  # keep?
-    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Light-25max.dat", "19/03 (2)", 3),  # keep?
-    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Dark-25max-2.dat", "19/03 (3)", 3),
-    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Light-25max-2.dat", "19/03 (3)", 3),
-    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Dark.dat", "19/03 (1)", 1),
-    # ("data/cvd_func_19032024/CVD2F-Isd-Vg-Light.dat", "19/03 (1)", 0),  # no linear region
-    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Dark-35max.dat", "19/03 (2)", 3),
-    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Light-35max.dat", "19/03 (2)", 2),
-    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Dark-35max-2.dat", "19/03 (3)", 3),
-    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Light-35max-2.dat", "19/03 (3)", 2),
-    ("data/cvd_time_power_22032024/CVD1F-Isd-Vg-Dark-post-long.dat", "22/03 (1)", 3),
-    ("data/cvd_time_power_22032024/CVD2F-Isd-Vg-Dark-post-long.dat", "22/03 (1)", 3),
-    ("data/cvd_time_power_22032024/CVD1F-Isd-Vg-Dark-final.dat", "22/03 (2)", 3),
-    ("data/cvd_time_power_22032024/CVD1F-Isd-Vg-Light-final.dat", "22/03 (2)", 3),
-    ("data/cvd_time_power_22032024/CVD2F-Isd-Vg-Dark-final.dat", "22/03 (2)", 3),
-    ("data/cvd_time_power_22032024/CVD2F-Isd-Vg-Light-final.dat", "22/03 (2)", 3),
-    ("data/cvd_high_current_26032024/CVD1F-Isd-Vg-Dark-final.dat", "26/03", 3),
-    ("data/cvd_high_current_26032024/CVD1F-Isd-Vg-Light-final.dat", "26/03", 3),
-    ("data/cvd_high_current_26032024/CVD2F-Isd-Vg-Dark-final.dat", "26/03", 3),
-    ("data/cvd_high_current_26032024/CVD2F-Isd-Vg-Light-final.dat", "26/03", 3),
+    ("data/cvd_func_15032024/CVD1F-Isd-Vg-Dark.dat", "Day 1", 1),
+    ("data/cvd_func_15032024/CVD1F-Isd-Vg-Light.dat", "Day 1", 1),
+    ("data/cvd_func_15032024/CVD2F-Isd-Vg-Dark.dat", "Day 1", 1),
+    # ("data/cvd_func_15032024/CVD2F-Isd-Vg-Light.dat", "Day 1", 0),  # no linear region
+    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Dark.dat", "Day 2 (1)", 2),
+    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Light.dat", "Day 2 (1)", 2),
+    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Dark-25max.dat", "Day 2 (2)", 3),  # keep?
+    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Light-25max.dat", "Day 2 (2)", 3),  # keep?
+    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Dark-25max-2.dat", "Day 2 (3)", 3),
+    ("data/cvd_func_19032024/CVD1F-Isd-Vg-Light-25max-2.dat", "Day 2 (3)", 3),
+    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Dark.dat", "Day 2 (1)", 1),
+    # ("data/cvd_func_19032024/CVD2F-Isd-Vg-Light.dat", "Day 2 (1)", 0),  # no linear region
+    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Dark-35max.dat", "Day 2 (2)", 3),
+    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Light-35max.dat", "Day 2 (2)", 2),
+    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Dark-35max-2.dat", "Day 2 (3)", 3),
+    ("data/cvd_func_19032024/CVD2F-Isd-Vg-Light-35max-2.dat", "Day 2 (3)", 2),
+    ("data/cvd_time_power_22032024/CVD1F-Isd-Vg-Dark-post-long.dat", "Day 3 (1)", 3),
+    ("data/cvd_time_power_22032024/CVD2F-Isd-Vg-Dark-post-long.dat", "Day 3 (1)", 3),
+    ("data/cvd_time_power_22032024/CVD1F-Isd-Vg-Dark-final.dat", "Day 3 (2)", 3),
+    ("data/cvd_time_power_22032024/CVD1F-Isd-Vg-Light-final.dat", "Day 3 (2)", 3),
+    ("data/cvd_time_power_22032024/CVD2F-Isd-Vg-Dark-final.dat", "Day 3 (2)", 3),
+    ("data/cvd_time_power_22032024/CVD2F-Isd-Vg-Light-final.dat", "Day 3 (2)", 3),
+    ("data/cvd_high_current_26032024/CVD1F-Isd-Vg-Dark-final.dat", "Day 4", 3),
+    ("data/cvd_high_current_26032024/CVD1F-Isd-Vg-Light-final.dat", "Day 4", 3),
+    ("data/cvd_high_current_26032024/CVD2F-Isd-Vg-Dark-final.dat", "Day 4", 3),
+    ("data/cvd_high_current_26032024/CVD2F-Isd-Vg-Light-final.dat", "Day 4", 3),
 )
 
 dVg = 0.2  # Gate voltage step resolution (V)
@@ -328,10 +331,10 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 ax1.set_title("Device 1 - Functionalised with Quantum Dots")
 ax2.set_title("Device 2 - Functionalised with Perovskites")
 for ax in (ax1, ax2):
-    ax.set_xlabel("Measurement set label \n(date and number)")
+    ax.set_xlabel("Day and measurement numbers")
     ax.set_ylabel("Dirac voltage, $V_{Dirac}$ (V)")
-ax1.errorbar(dark1_names, dark1_dirac_V, yerr=dark1_dirac_V_err, color='C0', ecolor='C3', fmt='o', capsize=4)
-ax1.errorbar(light1_names, light1_dirac_V, yerr=light1_dirac_V_err, color='C2', ecolor='C3', fmt='o', capsize=4)
+ax1.errorbar(dark1_names, dark1_dirac_V, yerr=dark1_dirac_V_err, label='Dark conditions', color='C0', ecolor='C3', fmt='o', capsize=4)
+ax1.errorbar(light1_names, light1_dirac_V, yerr=light1_dirac_V_err, label='Light conditions', color='C2', ecolor='C3', fmt='o', capsize=4)
 ax2.errorbar(dark2_names, dark2_dirac_V, yerr=dark2_dirac_V_err, label='Dark conditions', color='C0', ecolor='C3', fmt='o', capsize=4)
 ax2.errorbar(light2_names, light2_dirac_V, yerr=light2_dirac_V_err, label='Light conditions', color='C2', ecolor='C3', fmt='o', capsize=4)
 # Also plot the individual datapoints which go into calculating the mean
@@ -343,7 +346,11 @@ ax2.plot(np.tile(np.array([dark2_names]).T, 4).flatten(),
          dark2_data[:, 2, :].flatten(), '.', color='C0')
 ax2.plot(np.tile(np.array([light2_names]).T, 4).flatten(),
          light2_data[:, 2, :].flatten(), '.', color='C2')
-fig.legend()
+ax1.legend()
+ax2.legend()
+# ax1.set_xticklabels(dark1_names, fontsize=12)
+# ax2.set_xticklabels(dark2_names, fontsize=12)
+fig.tight_layout()
 
 # Create plot showing how the hole mobilities have varied between measurements
 # (mobilities determined from maximum gradient)
@@ -351,12 +358,12 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 ax1.set_title("Device 1 - Functionalised with Quantum Dots")
 ax2.set_title("Device 2 - Functionalised with Perovskites")
 for ax in (ax1, ax2):
-    ax.set_xlabel("Measurement set label \n(date and number)")
+    ax.set_xlabel("Day and measurement numbers")
     ax.set_ylabel("Hole mobility, $\\mu_p$ (cm$^2$ V${^-1}$ s$^{-1}$)")
-ax1.errorbar(dark1_names, dark1_mu_max_p*1e4, yerr=dark1_mu_max_p_err*1e4, color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax1.errorbar(light1_names, light1_mu_max_p*1e4, yerr=light1_mu_max_p_err*1e4, color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax2.errorbar(dark2_names, dark2_mu_max_p*1e4, yerr=dark2_mu_max_p_err*1e4, label='$\\mu_{max}$, Dark conditions', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax2.errorbar(light2_names, light2_mu_max_p*1e4, yerr=light2_mu_max_p_err*1e4, label='$\\mu_{max}$, Light conditions', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax1.errorbar(dark1_names, dark1_mu_max_p*1e4, yerr=dark1_mu_max_p_err*1e4, label='$\\mu_{max}$', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax1.errorbar(light1_names, light1_mu_max_p*1e4, yerr=light1_mu_max_p_err*1e4, label='$\\mu_{max}$', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax2.errorbar(dark2_names, dark2_mu_max_p*1e4, yerr=dark2_mu_max_p_err*1e4, label='$\\mu_{max}$', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax2.errorbar(light2_names, light2_mu_max_p*1e4, yerr=light2_mu_max_p_err*1e4, label='$\\mu_{max}$', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
          dark1_data[:, 0, :].flatten()*1e4, 'o', color='C0', markersize=3)
@@ -367,11 +374,12 @@ ax2.plot(np.tile(np.array([dark2_names]).T, 4).flatten(),
 ax2.plot(np.tile(np.array([light2_names]).T, 4).flatten(),
          light2_data[:, 0, :].flatten()*1e4, 'o', color='C2', markersize=3)
 # On the same plot, show the mobilities at the FWHM
-ax1.errorbar(dark1_names, dark1_mu_FWHM_p*1e4, yerr=dark1_mu_FWHM_p_err*1e4, color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
-ax1.errorbar(light1_names, light1_mu_FWHM_p*1e4, yerr=light1_mu_FWHM_p_err*1e4, color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
-ax2.errorbar(dark2_names, dark2_mu_FWHM_p*1e4, yerr=dark2_mu_FWHM_p_err*1e4, label='$\\mu_{FWHM}$, Dark conditions', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
-ax2.errorbar(light2_names, light2_mu_FWHM_p*1e4, yerr=light2_mu_FWHM_p_err*1e4, label='$\\mu_{FWHM}$, Light conditions', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
-fig.legend()
+ax1.errorbar(dark1_names, dark1_mu_FWHM_p*1e4, yerr=dark1_mu_FWHM_p_err*1e4, label='$\\mu_{FWHM}$ (Dark)', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax1.errorbar(light1_names, light1_mu_FWHM_p*1e4, yerr=light1_mu_FWHM_p_err*1e4, label='$\\mu_{FWHM}$ (Light)', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax2.errorbar(dark2_names, dark2_mu_FWHM_p*1e4, yerr=dark2_mu_FWHM_p_err*1e4, label='$\\mu_{FWHM}$ (Dark)', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax2.errorbar(light2_names, light2_mu_FWHM_p*1e4, yerr=light2_mu_FWHM_p_err*1e4, label='$\\mu_{FWHM}$ (Light)', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax1.legend(ncols=2)
+ax2.legend(ncols=2)
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
          dark1_data[:, 6, :].flatten()*1e4, '^', color='C0', markersize=3)
@@ -381,18 +389,21 @@ ax2.plot(np.tile(np.array([dark2_names]).T, 4).flatten(),
          dark2_data[:, 6, :].flatten()*1e4, '^', color='C0', markersize=3)
 ax2.plot(np.tile(np.array([light2_names]).T, 4).flatten(),
          light2_data[:, 6, :].flatten()*1e4, '^', color='C2', markersize=3)
+ax1.set_xticklabels(dark1_names, fontsize=12)
+ax2.set_xticklabels(dark2_names, fontsize=12)
+fig.tight_layout()
 
 # Create plot showing how the electron mobilities have varied between measurements
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 ax1.set_title("Device 1 - Functionalised with Quantum Dots")
 ax2.set_title("Device 2 - Functionalised with Perovskites")
 for ax in (ax1, ax2):
-    ax.set_xlabel("Measurement set label \n(date and number)")
+    ax.set_xlabel("Day and measurement numbers")
     ax.set_ylabel("Electron mobility, $\\mu_n$ (cm$^2$ V${^-1}$ s$^{-1}$)")
-ax1.errorbar(dark1_names, dark1_mu_max_n*1e4, yerr=dark1_mu_max_n_err*1e4, color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax1.errorbar(light1_names, light1_mu_max_n*1e4, yerr=light1_mu_max_n_err*1e4, color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax2.errorbar(dark2_names, dark2_mu_max_n*1e4, yerr=dark2_mu_max_n_err*1e4, label='$\\mu_{max}$, Dark conditions', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
-ax2.errorbar(light2_names, light2_mu_max_n*1e4, yerr=light2_mu_max_n_err*1e4, label='$\\mu_{max}$, Light conditions', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax1.errorbar(dark1_names, dark1_mu_max_n*1e4, yerr=dark1_mu_max_n_err*1e4, label='$\\mu_{max}$', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax1.errorbar(light1_names, light1_mu_max_n*1e4, yerr=light1_mu_max_n_err*1e4, label='$\\mu_{max}$', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax2.errorbar(dark2_names, dark2_mu_max_n*1e4, yerr=dark2_mu_max_n_err*1e4, label='$\\mu_{max}$ (Dark)', color='C0', ecolor='C3', fmt='o', markersize=6, capsize=4)
+ax2.errorbar(light2_names, light2_mu_max_n*1e4, yerr=light2_mu_max_n_err*1e4, label='$\\mu_{max}$ (Light)', color='C2', ecolor='C3', fmt='o', markersize=6, capsize=4)
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
          dark1_data[:, 8, :].flatten()*1e4, 'o', color='C0', markersize=3)
@@ -403,15 +414,18 @@ ax2.plot(np.tile(np.array([dark2_names]).T, 4).flatten(),
 ax2.plot(np.tile(np.array([light2_names]).T, 4).flatten(),
          light2_data[:, 8, :].flatten()*1e4, 'o', color='C2', markersize=3)
 # On the same plot, show the mobilities at the FWHM
-ax1.errorbar(dark1_names, dark1_mu_FWHM_n*1e4, yerr=dark1_mu_FWHM_n_err*1e4, label='$\\mu_{FWHM}$, Dark conditions', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
-ax1.errorbar(light1_names, light1_mu_FWHM_n*1e4, yerr=light1_mu_FWHM_n_err*1e4, label='$\\mu_{FWHM}$, Light conditions', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
-fig.legend()
+ax1.errorbar(dark1_names, dark1_mu_FWHM_n*1e4, yerr=dark1_mu_FWHM_n_err*1e4, label='$\\mu_{FWHM}$ (Dark)', color='C0', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax1.errorbar(light1_names, light1_mu_FWHM_n*1e4, yerr=light1_mu_FWHM_n_err*1e4, label='$\\mu_{FWHM}$ (Light)', color='C2', ecolor='C3', fmt='^', markersize=6, capsize=4)
+ax1.legend(ncols=2)
+ax2.legend(ncols=2, loc='lower left')
 # Also plot the individual datapoints which go into calculating the mean
 ax1.plot(np.tile(np.array([dark1_names]).T, 4).flatten(),
          dark1_data[:, 9, :].flatten()*1e4, '^', color='C0', markersize=3)
 ax1.plot(np.tile(np.array([light1_names]).T, 4).flatten(),
          light1_data[:, 9, :].flatten()*1e4, '^', color='C2', markersize=3)
-fig.legend()
+# ax1.set_xticklabels(dark1_names, fontsize=12)
+# ax2.set_xticklabels(dark2_names, fontsize=12)
+fig.tight_layout()
 
 # Calculating some extra parameters:
 # Overshoot in V_dirac estimate vs. actual V_dirac (when both are measured)
@@ -436,10 +450,10 @@ light1_mu_FWHM_n_diffs = np.abs(light1_mu_FWHM_n / light1_mu_max_n - 1)
 
 # Print results of how other properties were effected by the long experiments
 # First define which experiments took place before the long experiment:
-dark1_prelong = np.array([int(date[:2]) < 22 for date in dark1_names])
-light1_prelong = np.array([int(date[:2]) < 22 for date in light1_names])
-dark2_prelong = np.array([int(date[:2]) < 22 for date in dark2_names])
-light2_prelong = np.array([int(date[:2]) < 22 for date in light2_names])
+dark1_prelong = np.array([int(day[4]) < 3 for day in dark1_names])
+light1_prelong = np.array([int(day[4]) < 3 for day in light1_names])
+dark2_prelong = np.array([int(day[4]) < 3 for day in dark2_names])
+light2_prelong = np.array([int(day[4]) < 3 for day in light2_names])
 
 # Names to print when analysing various parameters
 parameter_titles = ("Dirac voltage", "V_Dirac extrapolation overshoot",
@@ -501,8 +515,10 @@ Create graphs showing conductivity and resistivity traces to provide
 illustration of some of the physical processes.
 """
 
-# Plots showing the shift in the Dirac peak due to light exposure
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+# Plots showing the shift in the conductivity trace due to light exposure
+# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+fig1, ax1 = plt.subplots(1, 1, figsize=(7, 6))
+fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
 files = ("data/cvd_func_19032024/CVD1F-Isd-Vg-Dark-25max.dat",
          "data/cvd_func_19032024/CVD1F-Isd-Vg-Light-25max.dat",
          "data/cvd_func_19032024/CVD1F-Isd-Vg-Dark-25max-2.dat",
@@ -523,17 +539,20 @@ for filename in files:
     stop_index = (num_passes - 1) * datapoints_per_pass
     Vg = Vg_data[start_index: stop_index]
     Isd = Isd_data[start_index: stop_index]
-    rho = Vsd / Isd
+    sigma = Isd / Vsd
     ax = ax1 if device == '1' else ax2
-    ax.plot(Vg, rho, color='C0' if conditions == 'Dark' else 'C3',
+    ax.plot(Vg, sigma, color='C0' if conditions == 'Dark' else 'C3',
             linestyle=':' if filename[-5] == '2' else '-',
             label=f'{conditions} conditions' if filename[-5] != '2' else None)
-ax1.set_title("Device 1 - Functionalised with Quantum Dots")
-ax2.set_title("Device 2 - Functionalised with Perovskites")
+# ax1.set_title("Device 1 - Functionalised with Quantum Dots")
+# ax2.set_title("Device 2 - Functionalised with Perovskites")
 for ax in (ax1, ax2):
     ax.legend()
     ax.set_xlabel("Gate voltage, $V_g$ (V)")
-    ax.set_ylabel("Resistivity, $\\rho$ ($\\Omega$/□)")
+    ax.set_ylabel("Conductivity, $\\sigma$ ($\\Omega^{-1}$□)")
+    ax.ticklabel_format(scilimits=[-4, 6], useMathText=True)
+fig1.tight_layout()
+fig2.tight_layout()
 
 # Plots showing linear extraplotion from the point with maximum mobility,
 # and methods for determining mobilities.
@@ -579,9 +598,9 @@ for filename in files:
     grad_line_p2 = min(a2 + 5, Vg[-1])
     axes[0].plot([grad_line_p1, -c1/m1], [m1*grad_line_p1+c1, 0], 'k:')
     axes[0].plot([grad_line_p2, -c2/m2], [m2*grad_line_p2+c2, 0], 'k:',
-                 label='Extrapolations')
-fig1.suptitle("Device 1 - Functionalised with Quantum Dots")
-fig2.suptitle("Device 2 - Functionalised with Perovskites")
+                 label='Tangent lines')
+# fig1.suptitle("Device 1 - Functionalised with Quantum Dots")
+# fig2.suptitle("Device 2 - Functionalised with Perovskites")
 for ax in (ax1a, ax2a):
     ax.legend()
     ax.set_xlabel("Gate voltage, $V_g$ (V)")
@@ -592,6 +611,8 @@ for ax in (ax1b, ax2b):
     ax.set_xlabel("Gate voltage, $V_g$ (V)")
     ax.set_ylabel("Gradient of conductivity, $d\\sigma/dV_g$ ($\\Omega^{-1}$□V$^{-1}$)")
     ax.ticklabel_format(useMathText=True)
+fig1.tight_layout()
+fig2.tight_layout()
 
 
 """
@@ -607,7 +628,7 @@ files = ("data/cvd_prefunc_12032024/CVD1-Isd-Vg.dat",
          "data/cvd_prefunc_12032024/CVD2-Isd-Vg.dat",
          "data/cvd_func_15032024/CVD1F-Isd-Vg-Dark.dat",
          "data/cvd_func_15032024/CVD2F-Isd-Vg-Dark.dat")
-labels = ("Pristine CVD1", "Pristine CVD2", "CVD1 w/ QDs", "CVD2 w/ NCs")
+labels = ("Pristine Device 1", "Pristine Device 2", "Device 1 w/ QDs", "Device 2 w/ NCs")
 colours = ("C0", "C3", "C9", "C6")
 print()
 print("Early measurment estimates of μ_FE and V_Dirac for the graphene samples:")
@@ -656,7 +677,8 @@ W = 9730e-6  # Width of the channel (perpendicular to current flow) (m)
 dW = 10e-6  # Width uncertainty
 Vsd = 5  # Source-drain voltage (V)
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+fig1, ax1 = plt.subplots(1, 1, figsize=(7, 6))
+fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
 files = ("data/ofet3_16022024/OFET3F-Isd-Vg-Dark.dat",
          "data/ofet3_16022024/OFET3F-Isd-Vg-Light.dat",
          "data/ofet4_23022024/OFET4F-Isd-Vg-Dark.dat",
@@ -685,7 +707,9 @@ for ax in (ax1, ax2):
     ax.set_xlabel("Gate voltage, $V_g$ (V)")
     ax.set_ylabel("Conductivity, $\\sigma$ ($\\Omega^{-1}$□)")
     ax.ticklabel_format(useMathText=True)
-ax1.set_title("OFET functionalised with Quantum Dots")
-ax2.set_title("OFET functionalised with Perovskites")
+# ax1.set_title("OFET functionalised with Quantum Dots")
+# ax2.set_title("OFET functionalised with Perovskites")
+fig1.tight_layout()
+fig2.tight_layout()
 
 plt.show()

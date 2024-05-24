@@ -2,6 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+plt.rcParams.update({'font.size': 14})
+
+
+
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -214,16 +218,17 @@ both devices, to check for changes in photocurrent (hence photoresponsivity).
 """
 
 file_table = (
-    ("../cvd_func_15032024/CVD1F-time.dat", "First measurment"),
-    ("../cvd_func_15032024/CVD2F-time.dat", "First measurment"),
-    ("CVD1F-time-10mV.dat", "Second measurment"),
-    ("CVD2F-time-10mV.dat", "Second measurment"),
+    ("../cvd_func_15032024/CVD1F-time.dat", "Day 1"),
+    ("../cvd_func_15032024/CVD2F-time.dat", "Day 1"),
+    ("CVD1F-time-10mV.dat", "Day 2"),
+    ("CVD2F-time-10mV.dat", "Day 2"),
 )
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+fig1, ax1 = plt.subplots(1, 1, figsize=(7, 6))
+fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
 # fig.suptitle("With constant $V_{sd} = 10$ mV and $V_g = 0$ V")
-ax1.set_title("Device 1 - Functionalised with Quantum Dots")
-ax2.set_title("Device 2 - Functionalised with Perovskites")
+# ax1.set_title("Device 1 - Functionalised with Quantum Dots")
+# ax2.set_title("Device 2 - Functionalised with Perovskites")
 for data in file_table[0::2]:
     time, current = np.loadtxt(data[0], usecols=(1, 3), unpack=True)
     ax1.plot(time, 1e6*current, label=data[1])
@@ -233,9 +238,10 @@ for data in file_table[1::2]:
 for ax in (ax1, ax2):
     ax.set_xlabel("Time, $t$, (s)")
     ax.set_ylabel("Source-drain current, $I_{sd}$, ($\\mu$A)")
-ax1.legend()
-ax2.legend()
-fig.tight_layout()
+ax1.legend(loc='upper right')
+ax2.legend(loc='upper right')
+fig1.tight_layout()
+fig2.tight_layout()
 
 # It looks like we've lost the slow times and their exponential curve shapes,
 # so we'll just do a manual photocurrent calculation for measurement set 2.

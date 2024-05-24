@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+plt.rcParams.update({'font.size': 14})
+
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -35,7 +37,7 @@ fit_region_names = ("Initial dark period", "Illuminated period",
 
 current *= 1e6  # convert to microamps for plotting
 time /= 3600  # convert to hours for plotting
-fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+fig, ax = plt.subplots(1, 1, figsize=(9, 6))
 ax.plot([time[0], time[-1]], [current[0], current[0]], 'k--')
 ax.annotate("Initial current", (time[-1]*0.75, current[0]+0.015))
 ax.plot(time, current)
@@ -55,9 +57,9 @@ inset_1.plot(on_region_time, on_region_current)
 inset_1.plot(np.ones(2)*time[fit_region_indices[0][1]],
              [min(on_region_current), max(on_region_current)],
              color='black', linestyle='dotted')
-inset_1.annotate("Light off", (1.461, 3.1), rotation=90)
+inset_1.annotate("Light off", (1.460, 3.1), rotation=90)
 inset_1.annotate("Light on", (1.465, 3.1), rotation=90)
-inset_2 = ax.inset_axes([0.5, 0.07, 0.42, 0.48],
+inset_2 = ax.inset_axes([0.53, 0.07, 0.42, 0.48],
                         xlim=(min(off_region_time), max(off_region_time)),
                         ylim=(min(off_region_current), max(off_region_current)))
 ax.indicate_inset_zoom(inset_2, edgecolor='black')
@@ -65,8 +67,9 @@ inset_2.plot(off_region_time, off_region_current)
 inset_2.plot(np.ones(2)*time[fit_region_indices[1][1]],
              [min(off_region_current), max(off_region_current)],
              color='black', linestyle='dotted')
-inset_2.annotate("Light on", (2.14, 2.39), rotation=90)
+inset_2.annotate("Light on", (2.11, 2.39), rotation=90)
 inset_2.annotate("Light off", (2.30, 2.39), rotation=90)
+fig.tight_layout()
 
 current /= 1e6  # convert to back to amps
 time *= 3600  # convert back to seconds

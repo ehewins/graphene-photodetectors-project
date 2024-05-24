@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+plt.rcParams.update({'font.size': 14})
+
+
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -47,7 +50,7 @@ fig.tight_layout()
 
 # Graphing the source-drain current versus time for alternating dark and light conditions
 
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 6))
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7, 6))
 # fig.suptitle("Source-drain current measurements with $V_{sd} = 10$ mV")
 axes = (ax1, ax2)
 files = ("CVD1-time.dat", "CVD2-time.dat")
@@ -55,14 +58,14 @@ for f, ax in zip(files, axes):
     time, Isd = np.loadtxt(f, delimiter='\t', usecols=(1, 3), unpack=True)
     Isd = Isd[time <= 90]
     time = time[time <= 90]
-    ax.plot(time, Isd*1e6, '.-')
-    ax.set_ylabel("Source-drain current, $I_{sd}$ ($\\mu$A)")
+    ax.plot(time, Isd*1e6, '-')
+    ax.set_ylabel("Current, $I_{sd}$ ($\\mu$A)")
     print("Average time between I_{sd}(t) datapoints:",
           str(np.mean(time[1::2] - time[0:-1:2])), "seconds.")
 ax1.tick_params(axis='x', labelbottom=False)
 ax2.set_xlabel("Time, $t$ (s)")
-ax1.legend(["CVD sample 1"])
-ax2.legend(["CVD sample 2"])
+ax1.legend(["Device 1"])
+ax2.legend(["Device 2"])
 fig.tight_layout()
 
 """

@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+plt.rcParams.update({'font.size': 14})
+
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -15,7 +17,9 @@ Resistance calculations are done in the data-processing.py files found in
 the OFET data directories.
 """
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+fig1, ax1 = plt.subplots(1, 1, figsize=(7, 6))
+fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
 axes = (ax1, ax2)
 devices = ("OFET4", "OFET3")
 directories = ("data/ofet4_23022024/", "data/ofet3_16022024/")
@@ -37,9 +41,11 @@ for device, ax, directory in zip(devices, axes, directories):
     ax.set_xlabel("Source-drain voltage, $V_{sd}$ (V)")
     ax.set_ylabel("Source-drain current, $I_{sd}$ (nA)")
     ax.legend()
-ax1.set_title("OFET Functionalised with Quantum Dots")
-ax2.set_title("OFET Functionalised with Perovskites")
-fig.tight_layout()
+# ax1.set_title("OFET Functionalised with Quantum Dots")
+# ax2.set_title("OFET Functionalised with Perovskites")
+# fig.tight_layout()
+fig1.tight_layout()
+fig2.tight_layout()
 
 """
 Objective 2:
@@ -48,7 +54,9 @@ functionalisation, and as a result of illumination by the laser.
 Also calculate the resistivity in each case.
 """
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+fig1, ax1 = plt.subplots(1, 1, figsize=(7, 6))
+fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
 axes = (ax1, ax2)
 devices = ("CVD1", "CVD2")
 conditions = ("Pristine", "Dark", "Light")
@@ -71,8 +79,10 @@ for device, ax in zip(devices, axes):
     ax.set_xlabel("Source-drain voltage, $V_{sd}$ (mV)")
     ax.set_ylabel("Source-drain current, $I_{sd}$ ($\\mu$A)")
     ax.legend()
-ax1.set_title("Device 1, Functionalised with Quantum Dots")
-ax2.set_title("Device 2, Functionalised with Perovskites")
-fig.tight_layout()
+# ax1.set_title("Device 1, Functionalised with Quantum Dots")
+# ax2.set_title("Device 2, Functionalised with Perovskites")
+# fig.tight_layout()
+fig1.tight_layout()
+fig2.tight_layout()
 
 plt.show()

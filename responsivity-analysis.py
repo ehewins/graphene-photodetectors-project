@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+plt.rcParams.update({'font.size': 14})
+
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -45,15 +47,16 @@ cvd2_responsivity_2_err = np.array([1.217404e+01, 1.052386e+00,
 (cvd2_m2, cvd2_c2), cvd2_cv2 = curve_fit(linear_fit, np.log10(power_2),
                                          np.log10(cvd2_responsivity_2))
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-ax1.errorbar(power_1, cvd1_responsivity_1, yerr=cvd1_responsivity_1_err, fmt='o', color='C0', capsize=2, ecolor='C3', label='Before long expt.')
+fig1, ax1 = plt.subplots(1, 1, figsize=(7, 6))
+fig2, ax2 = plt.subplots(1, 1, figsize=(7, 6))
+ax1.errorbar(power_1, cvd1_responsivity_1, yerr=cvd1_responsivity_1_err, fmt='o', color='C0', capsize=2, ecolor='C3', label='Before long UV exposure')
 ax1.plot(power_1, 10**cvd1_c1 * power_1**cvd1_m1, 'k-')
-ax1.errorbar(power_2, cvd1_responsivity_2, yerr=cvd1_responsivity_2_err, fmt='o', color='C1', capsize=2, ecolor='C3', label='After long expt.')
-ax1.plot(power_2, 10**cvd1_c2 * power_2**cvd1_m2, 'k-', label='Fit line')
-ax2.errorbar(power_1, cvd2_responsivity_1, yerr=cvd2_responsivity_1_err, fmt='o', color='C0', capsize=2, ecolor='C3', label='Before long expt.')
+ax1.errorbar(power_2, cvd1_responsivity_2, yerr=cvd1_responsivity_2_err, fmt='o', color='C1', capsize=2, ecolor='C3', label='After long UV exposure')
+ax1.plot(power_2, 10**cvd1_c2 * power_2**cvd1_m2, 'k-', label='Fit lines')
+ax2.errorbar(power_1, cvd2_responsivity_1, yerr=cvd2_responsivity_1_err, fmt='o', color='C0', capsize=2, ecolor='C3', label='Before long UV exposure')
 ax2.plot(power_1, 10**cvd2_c1 * power_1**cvd2_m1, 'k-')
-ax2.errorbar(power_2, cvd2_responsivity_2, yerr=cvd2_responsivity_2_err, fmt='o', color='C1', capsize=2, ecolor='C3', label='After long expt.')
-ax2.plot(power_2, 10**cvd2_c2 * power_2**cvd2_m2, 'k-', label='Fit line')
+ax2.errorbar(power_2, cvd2_responsivity_2, yerr=cvd2_responsivity_2_err, fmt='o', color='C1', capsize=2, ecolor='C3', label='After long UV exposure')
+ax2.plot(power_2, 10**cvd2_c2 * power_2**cvd2_m2, 'k-', label='Fit lines')
 
 for ax in (ax1, ax2):
     ax.set_xscale("log")
@@ -61,8 +64,9 @@ for ax in (ax1, ax2):
     ax.set_xlabel("Power on device, $P$ (W)")
     ax.set_ylabel("Photoresponsivity, $R$ (A/W)")
     ax.legend()
-ax1.set_title("Device 1 - Functionalised with Quantum Dots")
-ax2.set_title("Device 2 - Functionalised with Perovskites")
-fig.tight_layout()
+# ax1.set_title("Device 1 - Functionalised with Quantum Dots")
+# ax2.set_title("Device 2 - Functionalised with Perovskites")
+fig1.tight_layout()
+fig2.tight_layout()
 
 plt.show()

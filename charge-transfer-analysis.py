@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+plt.rcParams.update({'font.size': 14})
+
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -61,14 +63,14 @@ init_params = (8e-8, 9e0, 3e-7, 1e2, 6e-7, 4e2)
 param_list, error_list, fit_points_list = triple_fitting_process(region_t,
                                                                  region_I,
                                                                  init_params)
-fig, ax = plt.subplots(1, 1, figsize=(12, 7))
-# ax.set_title("Fitting with $I_{sd} = I_0 + \\sum_{i=1}^N a_i [\\exp(-t/\\tau_i) - 1]$")
-ax.set_xlabel("Time, $t$ (s)")
-ax.set_ylabel("Source-drain current, $I_{sd}$ ($\\mu$A)")
-ax.plot(region_t, 1e6*region_I, color='k', linestyle='-', label='Data')
+fig, ax1 = plt.subplots(1, 1, figsize=(7, 6))
+# ax1.set_title("Fitting with $I_{sd} = I_0 + \\sum_{i=1}^N a_i [\\exp(-t/\\tau_i) - 1]$")
+ax1.set_xlabel("Time, $t$ (hours)")
+ax1.set_ylabel("Source-drain current, $I_{sd}$ ($\\mu$A)")
+ax1.plot(region_t/60/60, 1e6*region_I, color='k', linestyle='-', label='Data')
 for n in range(3):
-    ax.plot(region_t, 1e6*fit_points_list[n], color=f'C{n}', linestyle='dotted',
-            linewidth=3, label=f'Fit w/ {n+1} exponent{"s" if n > 0 else ""}')
+    ax1.plot(region_t/60/60, 1e6*fit_points_list[n], ':', color=f'C{n}',
+             linewidth=3, label=f'Fit w/ {n+1} exponent{"s" if n > 0 else ""}')
     print("Fit params. for "+["one", "two", "three"][n]+" exponentials:")
     params, errors = param_list[n], error_list[n]
     for i in range(len(params)//2):
@@ -77,7 +79,7 @@ for n in range(3):
         result_string = f"a_{i+1:d} = {a:.2e} ± {a_err:.2e} A, "
         result_string += f"tau_{i+1:d} = {tau:.2f} ± {tau_err:.2f} s."
         print(result_string)
-ax.legend()
+ax1.legend()
 fig.tight_layout()
 
 print()
@@ -88,14 +90,21 @@ init_params = (1e-7, 7e2, -4e-7, 1e4, -5e-7, 6e4)
 param_list, error_list, fit_points_list = triple_fitting_process(region_t,
                                                                  region_I,
                                                                  init_params)
-fig, ax = plt.subplots(1, 1, figsize=(12, 7))
-# ax.set_title("Fitting with $I_{sd} = I_0 + \\sum_{i=1}^N a_i [\\exp(-t/\\tau_i) - 1]$")
-ax.set_xlabel("Time, $t$ (s)")
-ax.set_ylabel("Source-drain current, $I_{sd}$ ($\\mu$A)")
-ax.plot(region_t, 1e6*region_I, color='k', linestyle='-', label='Data')
+fig, ax2 = plt.subplots(1, 1, figsize=(7, 6))
+# ax2.set_title("Fitting with $I_{sd} = I_0 + \\sum_{i=1}^N a_i [\\exp(-t/\\tau_i) - 1]$")
+ax2.set_xlabel("Time, $t$ (hours)")
+ax2.set_ylabel("Source-drain current, $I_{sd}$ ($\\mu$A)")
+ax2.plot(region_t/60/60, 1e6*region_I, 'k-', label='Data')
+inset = ax2.inset_axes([0.5, 0.07, 0.45, 0.48],
+                       xlim=(2.2, 5), ylim=(2.32, 2.56))
+ax2.indicate_inset_zoom(inset, edgecolor='black')
+inset.plot(region_t[region_t < 18000]/60/60, 1e6*region_I[region_t < 18000], 'k-')
 for n in range(3):
-    ax.plot(region_t, 1e6*fit_points_list[n], color=f'C{n}', linestyle='dotted',
-            linewidth=3, label=f'Fit w/ {n+1} exponent{"s" if n > 0 else ""}')
+    ax2.plot(region_t/60/60, 1e6*fit_points_list[n], ':', color=f'C{n}',
+             linewidth=3, label=f'Fit w/ {n+1} exponent{"s" if n > 0 else ""}')
+    inset.plot(region_t[region_t < 18000]/60/60,
+               1e6*fit_points_list[n][region_t < 18000], ':',
+               color=f'C{n}', linewidth=3)
     print("Fit params. for "+["one", "two", "three"][n]+" exponentials:")
     params, errors = param_list[n], error_list[n]
     for i in range(len(params)//2):
@@ -104,73 +113,46 @@ for n in range(3):
         result_string = f"a_{i+1:d} = {a:.2e} ± {a_err:.2e} A, "
         result_string += f"tau_{i+1:d} = {tau:.2f} ± {tau_err:.2f} s."
         print(result_string)
-ax.legend()
+ax2.legend(loc='upper left')
 fig.tight_layout()
 
-# """
-# Objective 2:
-# Repeat this fitting process for the first long-time experiment we ran - the one
-# with low res. data and a final current different from the initial current.
-# """
+"""
+Objective 2:
+Create a figure for the first long-time experiment we ran - the one with
+low resolution data and a final current different from the initial current.
+"""
 
 # print()
 # print("=============== Low Resolution Long Time Experiments [22/03/24] ===============")
 # print()
 
-# filename = "data/cvd_time_power_22032024/CVD1F-long-time-lowres.dat"
-# time, current = np.loadtxt(filename, usecols=(0, 1), unpack=True)
-# fit_region_indices = [[3680, 8464], [8464, len(current)-1]]
+filename = "data/cvd_time_power_22032024/CVD1F-long-time-lowres.dat"
+time, current = np.loadtxt(filename, usecols=(0, 1), unpack=True)
+time /= 60*60  # Convert time to seconds for plotting
+current *= 1e6  # Convert current to microamps for plotting
+fig, ax = plt.subplots(1, 1, figsize=(5, 6))
+ax.plot(time, current, label='Data')
+ax.set_xlabel("Time, $t$ (hours)")
+ax.set_ylabel("Source-drain current, $I_{sd}$ ($\\mu$A)")
 
-# print("For the first region, equilibrating from light off to light on state:")
-# region_t = time[fit_region_indices[0][0]: fit_region_indices[0][1]]
-# region_I = current[fit_region_indices[0][0]: fit_region_indices[0][1]]
-# init_params = np.tile((1e-6, 3e2), 3)
-# param_list, error_list, fit_points_list = triple_fitting_process(region_t,
-#                                                                  region_I,
-#                                                                  init_params)
-# fig, ax = plt.subplots(1, 1, figsize=(12, 7))
-# ax.set_title("Fitting with $I_{sd} = I_0 + \\sum_{i=1}^N a_i [\\exp(-t/\\tau_i) - 1]$")
-# ax.set_xlabel("Time, $t$ (s)")
-# ax.set_ylabel("Source-drain current, $I_{sd}$ (A)")
-# ax.plot(region_t, region_I, color='k', linestyle='-', label='Data')
-# for n in range(3):
-#     ax.plot(region_t, fit_points_list[n], color=f'C{n}', linestyle='dotted',
-#             linewidth=3, label=f'Fit w/ $N={n+1}$')
-#     print("Fit params. for "+["one", "two", "three"][n]+" exponentials:")
-#     params, errors = param_list[n], error_list[n]
-#     for i in range(len(params)//2):
-#         a, a_err = params[2 * i], errors[2 * i]
-#         tau, tau_err = params[2 * i + 1], errors[2 * i + 1]
-#         result_string = f"a_{i+1:d} = {a:.2e} ± {a_err:.2e} A, "
-#         result_string += f"tau_{i+1:d} = {tau:.2f} ± {tau_err:.2f} s."
-#         print(result_string)
-# ax.legend()
-
-# print()
-# print("For the second region, equilibrating from light on to light off state:")
-# region_t = time[fit_region_indices[1][0]: fit_region_indices[1][1]]
-# region_I = current[fit_region_indices[1][0]: fit_region_indices[1][1]]
-# init_params = (2e-1, 2e3, -2e-1, 2e3, 1, 1)
-# param_list, error_list, fit_points_list = triple_fitting_process(region_t,
-#                                                                  region_I,
-#                                                                  init_params)
-# fig, ax = plt.subplots(1, 1, figsize=(12, 7))
-# ax.set_title("Fitting with $I_{sd} = I_0 + \\sum_{i=1}^N a_i [\\exp(-t/\\tau_i) - 1]$")
-# ax.set_xlabel("Time, $t$ (s)")
-# ax.set_ylabel("Source-drain current, $I_{sd}$ (A)")
-# ax.plot(region_t, region_I, color='k', linestyle='-', label='Data')
-# for n in range(3):
-#     ax.plot(region_t, fit_points_list[n], color=f'C{n}', linestyle='dotted',
-#             linewidth=3, label=f'Fit w/ $N={n+1}$')
-#     print("Fit params. for "+["one", "two", "three"][n]+" exponentials:")
-#     params, errors = param_list[n], error_list[n]
-#     for i in range(len(params)//2):
-#         a, a_err = params[2 * i], errors[2 * i]
-#         tau, tau_err = params[2 * i + 1], errors[2 * i + 1]
-#         result_string = f"a_{i+1:d} = {a:.2e} ± {a_err:.2e} A, "
-#         result_string += f"tau_{i+1:d} = {tau:.2f} ± {tau_err:.2f} s."
-#         print(result_string)
-# ax.legend()
+# Select end region of data to extrapolate from
+fit_t = time[10000:]
+fit_I = current[10000:]
+offset_t = fit_t[0]
+offset_I = fit_I[0]
+fit_t -= offset_t
+fit_I -= offset_I
+(a, tau), cv = curve_fit(single_exp, fit_t, fit_I, p0=(1e-6, 3e2))
+extrap_t = 25  # Time in hours to extrapolate up until
+smooth_t = np.linspace(0, extrap_t-offset_t, 200)
+smooth_I = single_exp(smooth_t, a, tau)
+# Plot the extrapolation, and a line showing the initial current
+ax.plot([0, extrap_t], [current[0], current[0]], 'k--',
+        label='Initial current')
+ax.plot(smooth_t+offset_t, smooth_I+offset_I, ':', color='C3', linewidth='2',
+        label='Extrapolation')
+ax.legend()
+fig.tight_layout()
 
 """
 Objective 3:
@@ -191,7 +173,7 @@ for problem_index in region_indices[0:8:2]:
 (m, c), cv = curve_fit(linear_fit, time, current)
 current -= m * time  # subtract (approximately) linear slow effect.
 
-fig, ax = plt.subplots(1, 1, figsize=(12, 7))
+fig, ax = plt.subplots(1, 1, figsize=(7, 6))
 # ax.set_title("Fitting with $I_{sd} = I_0 + \\sum_{i=1}^N a_i [\\exp(-t/\\tau_i) - 1]$")
 ax.set_xlabel("Time, $t$ (s)")
 ax.set_ylabel("Source-drain current, $I_{sd}$ ($\\mu$A)")
@@ -207,20 +189,21 @@ for n, (region_start, region_end) in enumerate(zip(region_indices[:-1],
     fit_t = region_t - region_t[0]
     fit_I = region_I - region_I[0]
     init_params = init_params_1 if n % 2 == 0 else init_params_2
-    for fit_func, storage_array, p0, N in zip((single_exp, double_exp),
-                                              (singles, doubles),
-                                              (None, init_params),
-                                              (1, 2)):
+    for fit_func, storage_array, p0, N, colour in zip((single_exp, double_exp),
+                                                      (singles, doubles),
+                                                      (None, init_params),
+                                                      (1, 2),
+                                                      ('C3', 'C9')):
         params, cv = curve_fit(fit_func, fit_t, fit_I, p0=p0)
         smooth_t = np.linspace(fit_t[0], fit_t[-1], 50)
         smooth_I = fit_func(smooth_t, *params)
         label = f"Fits w/ {N} exponent{'s' if N > 1 else ''}"
         ax.plot(smooth_t + region_t[0], 1e6*(smooth_I + region_I[0]), ':',
                 label=label if unlabelled else None,
-                color=f'C{(N-1)*3}', linewidth=2.5)
+                color=colour, linewidth=2.5)
         unlabelled -= 1 if unlabelled != 0 else 0
         storage_array.append(params)
-ax.legend(loc="upper right")
+ax.legend(loc="lower left")
 fig.tight_layout()
 on_mean_1, on_std_1 = np.mean(singles[::2], axis=0), np.std(singles[::2], axis=0)
 off_mean_1, off_std_1 = np.mean(singles[1::2], axis=0), np.std(singles[1::2], axis=0)
