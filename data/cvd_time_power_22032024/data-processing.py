@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+plt.rcParams.update({'font.size': 14})
+
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -35,7 +37,7 @@ fit_region_names = ("Initial dark period", "Illuminated period",
 
 current *= 1e6  # convert to microamps for plotting
 time /= 3600  # convert to hours for plotting
-fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+fig, ax = plt.subplots(1, 1, figsize=(9, 6))
 ax.plot([time[0], time[-1]], [current[0], current[0]], 'k--')
 ax.annotate("Initial current", (time[-1]*0.75, current[0]+0.015))
 ax.plot(time, current)
@@ -55,9 +57,9 @@ inset_1.plot(on_region_time, on_region_current)
 inset_1.plot(np.ones(2)*time[fit_region_indices[0][1]],
              [min(on_region_current), max(on_region_current)],
              color='black', linestyle='dotted')
-inset_1.annotate("Light off", (1.461, 3.1), rotation=90)
+inset_1.annotate("Light off", (1.460, 3.1), rotation=90)
 inset_1.annotate("Light on", (1.465, 3.1), rotation=90)
-inset_2 = ax.inset_axes([0.5, 0.07, 0.42, 0.48],
+inset_2 = ax.inset_axes([0.53, 0.07, 0.42, 0.48],
                         xlim=(min(off_region_time), max(off_region_time)),
                         ylim=(min(off_region_current), max(off_region_current)))
 ax.indicate_inset_zoom(inset_2, edgecolor='black')
@@ -65,8 +67,9 @@ inset_2.plot(off_region_time, off_region_current)
 inset_2.plot(np.ones(2)*time[fit_region_indices[1][1]],
              [min(off_region_current), max(off_region_current)],
              color='black', linestyle='dotted')
-inset_2.annotate("Light on", (2.14, 2.39), rotation=90)
+inset_2.annotate("Light on", (2.11, 2.39), rotation=90)
 inset_2.annotate("Light off", (2.30, 2.39), rotation=90)
+fig.tight_layout()
 
 current /= 1e6  # convert to back to amps
 time *= 3600  # convert back to seconds
@@ -245,15 +248,15 @@ Use these to determine the relationship between power and photoresponsivity.
 
 fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(14, 6))
-fig1.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
-fig2.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
+# fig1.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
+# fig2.suptitle("With constant $V_{sd} = 50$ mV and $V_g = 0$ V")
 for ax in (ax1, ax3):
     ax.set_title("Device 1 - Quantum Dots")
 for ax in (ax2, ax4):
     ax.set_title("Device 2 - Perovskites")
 for ax in (ax1, ax2):
     ax.set_xlabel("Time, $t$, (s)")
-    ax.set_ylabel("Source-drain current, $I_{sd}$, (A)")
+    ax.set_ylabel("Source-drain current, $I_{sd}$, ($\\mu$A)")
 for ax in (ax3, ax4):
     ax.set_xlabel("Power on device, $P$ (W)")
     ax.set_ylabel("Photoresponsivity, $R$ (A/W)")
@@ -261,8 +264,8 @@ time1, current1 = np.loadtxt("CVD1F-time-power.dat", delimiter='\t',
                              usecols=(1, 3), unpack=True)
 time2, current2 = np.loadtxt("CVD2F-time-power.dat", delimiter='\t',
                              usecols=(1, 3), unpack=True)
-ax1.plot(time1, current1, label='Current')
-ax2.plot(time2, current2, label='Current')
+ax1.plot(time1, 1e6*current1, label='Current', color='tab:gray')
+ax2.plot(time2, 1e6*current2, label='Current', color='tab:gray')
 current1_jump_indices = [422, 423, 481, 482, 546, 547, 602, 603, 641, 642, 698,
                          699, 753, 754, 810, 811, 861, 862, 905, 906, 962, 963,
                          1030, 1031, 1065, 1066, 1120, 1121]
@@ -302,7 +305,7 @@ for i in range(4):
     jumps_labelled = 0
     for initial, final in zip(initial_indices, final_indices):
         ax1.plot([time1[initial], time1[final]],
-                 [current1[initial], current1[final]],
+                 [1e6*current1[initial], 1e6*current1[final]],
                  color=f'C{i+1}', linewidth=1.8,
                  label='Filter '+filter_name if jumps_labelled == 0 else None)
         jumps_labelled = 1
@@ -313,6 +316,7 @@ print(f"Gradient of log(R_ph) vs log(P) plot: {m:e} ± {np.sqrt(cv[0, 0]):e}")
 ax3.loglog(power, responsivity, 'bo', label='Data')
 ax3.loglog(power, 10**c * np.array(power)**m, 'k-', label='Linear fit')
 ax3.legend()
+fig1.tight_layout()
 
 print("For Device 2, functionalised with perovskites:")
 responsivity = []
@@ -337,7 +341,7 @@ for i in range(4):
     labelled = 0
     for initial, final in zip(initial_indices, final_indices):
         ax2.plot([time2[initial], time2[final]],
-                 [current2[initial], current2[final]],
+                 [1e6*current2[initial], 1e6*current2[final]],
                  color=f'C{i+1}', linewidth=1.8,
                  label=f'Filter {filter_name}' if labelled == 0 else None)
         labelled = 1
@@ -348,5 +352,6 @@ print(f"Gradient of log(R_ph) vs log(P) plot: {m:e} ± {np.sqrt(cv[0, 0]):e}")
 ax4.loglog(power, responsivity, 'bo', label='Data')
 ax4.loglog(power, 10**c * np.array(power)**m, 'k-', label='Linear fit')
 ax4.legend()
+fig2.tight_layout()
 
 plt.show()
